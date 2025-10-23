@@ -42,10 +42,8 @@ class ProcessSegmentation implements ShouldQueue
         try {
             Log::info("Starting segmentation processing for Study ID: {$this->study->id}");
             
-            // Simulate some processing time
             sleep(5);
             
-            // Intentionally fail this step as requested
             throw new \Exception("Segmentation processing failed: AI model encountered unexpected input format");
             
         } catch (\Exception $e) {
