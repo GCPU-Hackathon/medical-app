@@ -85,6 +85,9 @@ export default function StudiesIndex({ studies, stats }: Props) {
                             Medical studies and research data
                         </p>
                     </div>
+                    <Button asChild>
+                        <Link href="/patients/create">Start a study</Link>
+                    </Button>
                 </div>
 
                 {/* Stats Cards */}
