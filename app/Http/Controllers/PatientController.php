@@ -61,4 +61,19 @@ class PatientController extends Controller
                 ->get(),
         ]);
     }
+
+    /**
+     * API endpoint to get patients for selection components
+     */
+    public function apiIndex()
+    {
+        $patients = Patient::select('id', 'first_name', 'last_name', 'email', 'date_of_birth', 'gender', 'blood_type')
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get();
+
+        return response()->json([
+            'patients' => $patients,
+        ]);
+    }
 }

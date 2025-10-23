@@ -18,7 +18,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('patients/{patient}', [PatientController::class, 'show'])->name('patients.show');
 
     Route::get('studies', [StudyController::class, 'index'])->name('studies.index');
+    Route::post('studies', [StudyController::class, 'store'])->name('studies.store');
     Route::get('studies/{study}', [StudyController::class, 'show'])->name('studies.show');
+    Route::post('studies', [StudyController::class, 'store'])->name('studies.store');
+
+    // API routes for modal components
+    Route::prefix('api')->group(function () {
+        Route::get('patients', [PatientController::class, 'apiIndex']);
+        Route::get('gcs/directories', [StudyController::class, 'getGcsDirectories']);
+    });
 });
 
 Route::get('/test', function(){
