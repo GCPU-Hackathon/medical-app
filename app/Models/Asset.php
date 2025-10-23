@@ -34,15 +34,7 @@ class Asset extends Model
     {
         return $this->belongsTo(Study::class);
     }
-
-    /**
-     * Get the filename from the GCS path.
-     */
-    public function getFilenameAttribute(): string
-    {
-        return basename($this->gcs_path);
-    }
-
+    
     /**
      * Get the file extension from the GCS path.
      */

@@ -41,21 +41,16 @@ class ProcessQualityCheck implements ShouldQueue
         ]);
 
         try {
-            Log::info("Starting quality check for Study ID: {$this->study->id}, GCS Directory: {$this->study->gcs_directory}");
             
-            // Add initial delay to make it look more realistic
             sleep(3);
             
             // Step 1: Download all gz files from GCS directory
             $gzFiles = $this->downloadGzFilesFromGCS();
-            
             // Step 2: Extract each gz file to get .nii files
             $niiFiles = $this->extractAllGzFiles($gzFiles);
-            
-            // Step 5: Check if files are in correct format (*-t2w.nii, *-t1c.nii, *-t1n.nii, *-t2f.nii)
+            // Step 3: Check if files are in correct format (*-t2w.nii, *-t1c.nii, *-t1n.nii, *-t2f.nii)
             $this->validateNiiFiles($niiFiles);
-            
-            // Step 6: Link the assets using Asset model and store all files
+            // Step 4: Link the assets using Asset model and store all files
             $this->createAssetRecords($niiFiles);
             
             $step->update([
@@ -63,8 +58,6 @@ class ProcessQualityCheck implements ShouldQueue
                 'completed_at' => now(),
                 'notes' => 'Quality check completed successfully. All required asset types validated and stored.',
             ]);
-
-            Log::info("Quality check completed for Study ID: {$this->study->id}");
 
         } catch (\Exception $e) {
             Log::error("Quality check failed for Study ID: {$this->study->id}", [
@@ -89,7 +82,7 @@ class ProcessQualityCheck implements ShouldQueue
     private function downloadGzFilesFromGCS(): array
     {
         $gcsDisk = Storage::disk('gcs');
-        
+
         // List all files in the GCS directory
         $files = $gcsDisk->files($this->study->gcs_directory);
         

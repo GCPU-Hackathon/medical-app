@@ -30,7 +30,7 @@ interface StudyStep {
 
 interface Asset {
     id: number;
-    name: string;
+    filename: string;
     type: string;
     gcs_path: string;
     file_size: number;
@@ -85,7 +85,6 @@ export default function StudyShow({ study: initialStudy }: Props) {
 
     console.log(study);
 
-    // Use Inertia's built-in polling helper
     const { start: startPolling, stop: stopPolling } = usePoll(
         2000,
         {
@@ -96,7 +95,6 @@ export default function StudyShow({ study: initialStudy }: Props) {
             onFinish() {
                 console.log('Polling request finished for study:', study.code);
 
-                // Stop polling if study is no longer in a processing state
                 if (
                     study.status === 'completed' ||
                     study.status === 'failed' ||
@@ -161,35 +159,6 @@ export default function StudyShow({ study: initialStudy }: Props) {
             <Head title={`Study ${study.code}`} />
 
             <div className="space-y-6">
-                {/* Polling Status Indicator */}
-                {/* {isPolling && (
-                    <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 dark:border-blue-800 dark:bg-blue-950/20">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                                <div className="relative">
-                                    <div className="h-2 w-2 animate-pulse rounded-full bg-blue-500"></div>
-                                    <div className="absolute inset-0 h-2 w-2 animate-ping rounded-full bg-blue-500"></div>
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                                        Live Monitoring Active
-                                    </p>
-                                    <p className="text-xs text-blue-700 dark:text-blue-300">
-                                        Refreshing every 2 seconds to show
-                                        real-time updates
-                                    </p>
-                                </div>
-                            </div>
-                            <button
-                                onClick={stopPolling}
-                                className="text-xs font-medium text-blue-600 underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200"
-                            >
-                                Stop monitoring
-                            </button>
-                        </div>
-                    </div>
-                )} */}
-
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
@@ -231,7 +200,6 @@ export default function StudyShow({ study: initialStudy }: Props) {
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 p-4 lg:grid-cols-4">
-                    {/* Processing Pipeline - Takes 2/3 of the space */}
                     <div className="lg:col-span-3">
                         <Card className="min-h-[600px]">
                             <CardHeader>
@@ -625,6 +593,8 @@ export default function StudyShow({ study: initialStudy }: Props) {
                                                     /\.(jpg|jpeg|png|gif|bmp|svg|webp)$/i,
                                                 );
 
+                                            console.log(asset);
+
                                             return (
                                                 <div
                                                     key={asset.id}
@@ -639,11 +609,11 @@ export default function StudyShow({ study: initialStudy }: Props) {
                                                             )}
                                                         </div>
                                                         <div className="min-w-0 flex-1">
-                                                            <p className="truncate text-xs font-medium text-gray-900 dark:text-white">
-                                                                {asset.name}
+                                                            <p className="text-xs font-medium text-gray-900 dark:text-white">
+                                                                {asset.filename}
                                                             </p>
                                                             <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                                {asset.type ||
+                                                                {asset.asset_type ||
                                                                     'Unknown'}
                                                                 {asset.file_size && (
                                                                     <span className="ml-1">
