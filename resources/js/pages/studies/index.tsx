@@ -10,9 +10,11 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
+import { Create } from '@/pages/studies/Create';
 import { index, show } from '@/routes/studies';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
+import { ModalLink } from '@inertiaui/modal-react';
 import { Calendar, Eye, FileText, User } from 'lucide-react';
 
 interface Patient {
@@ -85,10 +87,15 @@ export default function StudiesIndex({ studies, stats }: Props) {
                             Medical studies and research data
                         </p>
                     </div>
-                    <Button asChild>
-                        <Link href="/patients/create">Start a study</Link>
+
+                    <Button>
+                        <ModalLink href="#create-study">
+                            Start a study
+                        </ModalLink>
                     </Button>
                 </div>
+
+                <Create />
 
                 {/* Stats Cards */}
                 <div className="grid gap-4 md:grid-cols-4">
