@@ -11,11 +11,12 @@ import {
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { Create } from '@/pages/studies/Create';
+import { SendToVR } from '@/pages/studies/SendToVR';
 import { index, show } from '@/routes/studies';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { ModalLink } from '@inertiaui/modal-react';
-import { Calendar, Eye, FileText, User } from 'lucide-react';
+import { Calendar, Eye, FileText, Glasses, User } from 'lucide-react';
 
 interface Patient {
     id: number;
@@ -25,6 +26,7 @@ interface Patient {
 
 interface Study {
     id: number;
+    code: string;
     title: string;
     description: string;
     status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
@@ -96,6 +98,11 @@ export default function StudiesIndex({ studies, stats }: Props) {
                 </div>
 
                 <Create />
+
+                {/* Render SendToVR modals for each study */}
+                {studies.data.map((study) => (
+                    <SendToVR key={`vr-${study.id}`} study={study} />
+                ))}
 
                 {/* Stats Cards */}
                 <div className="grid gap-4 md:grid-cols-4">
@@ -228,16 +235,36 @@ export default function StudiesIndex({ studies, stats }: Props) {
                                             </span>
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <Button
-                                                asChild
-                                                variant="outline"
-                                                size="sm"
-                                            >
-                                                <Link href={show(study.id).url}>
-                                                    <Eye className="mr-2 h-4 w-4" />
-                                                    View
-                                                </Link>
-                                            </Button>
+                                            <div className="flex justify-end gap-2">
+                                                <Button
+                                                    asChild
+                                                    variant="outline"
+                                                    size="sm"
+                                                >
+                                                    <Link
+                                                        href={
+                                                            show(study.id).url
+                                                        }
+                                                    >
+                                                        <Eye className="h-4 w-4" />
+                                                        View
+                                                    </Link>
+                                                </Button>
+
+                                                <Button
+                                                    asChild
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="border-purple-200 text-purple-600 hover:bg-purple-50 hover:text-purple-700"
+                                                >
+                                                    <ModalLink
+                                                        href={`#send-to-vr-${study.id}`}
+                                                    >
+                                                        <Glasses className="h-4 w-4" />
+                                                        Send to VR
+                                                    </ModalLink>
+                                                </Button>
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ))}

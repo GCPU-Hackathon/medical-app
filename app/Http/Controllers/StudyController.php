@@ -157,4 +157,55 @@ class StudyController extends Controller
         
         return redirect()->back()->with('success', 'Study has been cancelled.');
     }
+
+    /**
+     * Send study to VR platform
+     */
+    public function sendToVR(Study $study)
+    {
+        // Check if study is completed
+        if ($study->status !== 'completed') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Study must be completed before sending to VR platform.'
+            ], 400);
+        }
+
+        try {
+            // Update study to mark it as VR-enabled
+            $study->update([
+                'is_vr' => true,
+                'vr_sent_at' => now()
+            ]);
+
+            // Here you would typically:
+            // 1. Process the study assets for VR compatibility
+            // 2. Upload to VR platform
+            // 3. Create VR-specific metadata
+            // 4. Send notification to VR system
+            
+            // For now, we'll just simulate the process
+            \Log::info("Study {$study->code} sent to VR platform", [
+                'study_id' => $study->id,
+                'assets_count' => $study->assets()->count(),
+                'patient' => $study->patient->name
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Study successfully sent to VR platform!'
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error("Failed to send study {$study->code} to VR platform", [
+                'study_id' => $study->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send study to VR platform. Please try again.'
+            ], 500);
+        }
+    }
 }
