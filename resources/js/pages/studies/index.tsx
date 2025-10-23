@@ -153,7 +153,7 @@ export default function StudiesIndex({ studies, stats }: Props) {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Title</TableHead>
+                                    <TableHead>Code</TableHead>
                                     <TableHead>Patient</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead>Study Date</TableHead>
@@ -171,16 +171,8 @@ export default function StudiesIndex({ studies, stats }: Props) {
                                         <TableCell className="font-medium">
                                             <div>
                                                 <div className="font-semibold">
-                                                    {study.title}
+                                                    {study.code}
                                                 </div>
-                                                {study.description && (
-                                                    <div className="text-sm text-muted-foreground">
-                                                        {study.description
-                                                            .length > 50
-                                                            ? `${study.description.substring(0, 50)}...`
-                                                            : study.description}
-                                                    </div>
-                                                )}
                                             </div>
                                         </TableCell>
                                         <TableCell>

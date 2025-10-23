@@ -17,8 +17,9 @@ class StudyController extends Controller
      */
     public function index(): Response
     {
-        $studies = Study::with(['patient', 'studySteps', 'assets'])
+        $studies = Study::with(['patient'])
             ->latest()
+            ->withCount('studySteps', 'assets')
             ->paginate(10);
 
         $stats = [
