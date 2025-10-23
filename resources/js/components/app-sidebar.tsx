@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { index } from '@/routes/patients';
+import { index as studiesIndex } from '@/routes/studies';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import {
@@ -35,7 +36,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Studies',
-        href: dashboard(),
+        href: studiesIndex(),
         icon: ScanEye,
     },
 ];

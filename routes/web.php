@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PatientController;
+use App\Http\Controllers\StudyController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
@@ -15,6 +16,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('patients', [PatientController::class, 'index'])->name('patients.index');
     Route::get('patients/{patient}', [PatientController::class, 'show'])->name('patients.show');
+
+    Route::get('studies', [StudyController::class, 'index'])->name('studies.index');
+    Route::get('studies/{study}', [StudyController::class, 'show'])->name('studies.show');
 });
 
 Route::get('/test', function(){
