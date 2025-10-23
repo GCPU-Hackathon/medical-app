@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('studies', function (Blueprint $table) {
             $table->id();
+            $table->string('title');
+            $table->string('code')->unique();
             $table->foreignId('patient_id')->constrained('patients');
-            $table->string('study_code')->unique();
             $table->enum('status', ['NEW', 'PROCESSING', 'READY', 'FAILED']);
+            $table->boolean('is_vr')->default(false);
             $table->timestamps();
         });
     }

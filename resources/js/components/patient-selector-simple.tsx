@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, ChevronDown, Heart, User } from 'lucide-react';
+import { ChevronDown, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface Patient {

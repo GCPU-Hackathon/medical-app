@@ -11,8 +11,8 @@ services:
       - '5173:5173'
     volumes:
       - .:/var/www:cached
-      - /var/www/node_modules
-      - /var/www/vendor
+      # - /var/www/node_modules
+      # - /var/www/vendor
     depends_on:
       - redis
     networks:

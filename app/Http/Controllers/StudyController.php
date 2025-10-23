@@ -72,7 +72,7 @@ class StudyController extends Controller
     {
         $cacheKey = 'gcs_directories_list';
         
-        return Cache::remember($cacheKey, 600, function () { // 10 minutes cache
+        return Cache::remember($cacheKey, 86400, function () { // 10 minutes cache
             try {
                 $disk = Storage::disk('gcs');
                 $directories = $disk->directories();
