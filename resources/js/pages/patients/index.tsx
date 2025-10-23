@@ -5,7 +5,7 @@ import AppLayout from '@/layouts/app-layout';
 import { index, show } from '@/routes/patients';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { Calendar, Eye, Heart, Mail, User } from 'lucide-react';
+import { Calendar, Eye, Heart, Mail } from 'lucide-react';
 
 interface Patient {
     id: number;
@@ -53,10 +53,7 @@ export default function PatientsIndexSimple({ patients, stats }: Props) {
                         </p>
                     </div>
                     <Button asChild>
-                        <Link href="/patients/create">
-                            <User className="mr-2 h-4 w-4" />
-                            Add Patient
-                        </Link>
+                        <Link href="/patients/create">Add Patient</Link>
                     </Button>
                 </div>
 

@@ -1,8 +1,67 @@
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
+import { index } from '@/routes/patients';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
+import {
+    AlertCircle,
+    Brain,
+    Calculator,
+    CheckCircle,
+    Cloud,
+    Eye,
+    FileText,
+    Microscope,
+    User,
+    Users,
+    XCircle,
+} from 'lucide-react';
+
+interface Patient {
+    id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+    created_at: string;
+}
+
+interface GcsStatus {
+    status: 'online' | 'offline';
+    message: string;
+    directories?: number;
+    mri_scans?: number;
+    bucket_name?: string;
+    bucket_url?: string;
+    project_id?: string;
+    error?: string;
+    checked_at: string;
+}
+
+interface ServiceStatus {
+    name: string;
+    description: string;
+    status: 'online' | 'offline';
+    last_check: string;
+}
+
+interface DashboardStats {
+    total_patients: number;
+    total_studies: number;
+    recent_patients: Patient[];
+    gcs_status: GcsStatus;
+    services_status: {
+        segmentation: ServiceStatus;
+        volumetry: ServiceStatus;
+        analysis: ServiceStatus;
+    };
+}
+
+interface Props {
+    stats: DashboardStats;
+}
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -11,25 +70,393 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Dashboard() {
+export default function Dashboard({ stats }: Props) {
+    const getGcsStatusIcon = () => {
+        switch (stats.gcs_status.status) {
+            case 'online':
+                return <CheckCircle className="h-4 w-4 text-green-600" />;
+            case 'offline':
+                return <XCircle className="h-4 w-4 text-red-600" />;
+            default:
+                return <AlertCircle className="h-4 w-4 text-yellow-600" />;
+        }
+    };
+
+    const getGcsStatusVariant = () => {
+        switch (stats.gcs_status.status) {
+            case 'online':
+                return 'default';
+            case 'offline':
+                return 'destructive';
+            default:
+                return 'secondary';
+        }
+    };
+
+    const getServiceStatusIcon = (status: string) => {
+        switch (status) {
+            case 'online':
+                return <CheckCircle className="h-4 w-4 text-green-600" />;
+            case 'offline':
+                return <XCircle className="h-4 w-4 text-red-600" />;
+            default:
+                return <AlertCircle className="h-4 w-4 text-yellow-600" />;
+        }
+    };
+
+    const getServiceStatusVariant = (status: string) => {
+        switch (status) {
+            case 'online':
+                return 'default';
+            case 'offline':
+                return 'destructive';
+            default:
+                return 'secondary';
+        }
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
+
+            <div className="space-y-6 p-6">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight">
+                            Dashboard
+                        </h1>
+                        <p className="text-muted-foreground">
+                            Medical application overview and system status
+                        </p>
                     </div>
                 </div>
-                <div className="relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                    <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
+
+                {/* Stats Cards */}
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    {/* Google Cloud Storage Status */}
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Cloud Storage
+                            </CardTitle>
+                            <Cloud className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                            <div className="flex items-center space-x-3">
+                                <img
+                                    src="./img/google-cloud.png"
+                                    alt="GCS Logo"
+                                    className="h-8 w-8 object-contain"
+                                />
+                                <div className="flex items-center space-x-2">
+                                    {getGcsStatusIcon()}
+                                    <Badge
+                                        variant={getGcsStatusVariant() as any}
+                                    >
+                                        {stats.gcs_status.status.toUpperCase()}
+                                    </Badge>
+                                </div>
+                            </div>
+
+                            <div className="space-y-1">
+                                <p className="text-xs text-muted-foreground">
+                                    {stats.gcs_status.message}
+                                </p>
+
+                                {stats.gcs_status.bucket_name && (
+                                    <div className="text-xs text-muted-foreground">
+                                        <span className="font-medium">
+                                            Bucket:
+                                        </span>{' '}
+                                        {stats.gcs_status.bucket_name}
+                                    </div>
+                                )}
+
+                                {stats.gcs_status.bucket_url && (
+                                    <div className="font-mono text-xs text-muted-foreground">
+                                        {stats.gcs_status.bucket_url}
+                                    </div>
+                                )}
+
+                                {stats.gcs_status.status === 'online' && (
+                                    <div className="flex items-center justify-between pt-2">
+                                        <div className="text-xs text-muted-foreground">
+                                            <span className="font-medium">
+                                                Directories:
+                                            </span>{' '}
+                                            {stats.gcs_status.directories}
+                                        </div>
+                                        <div className="text-xs text-muted-foreground">
+                                            <span className="font-medium">
+                                                MRI Scans:
+                                            </span>{' '}
+                                            {stats.gcs_status.mri_scans}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {stats.gcs_status.error && (
+                                    <p className="text-xs text-red-600">
+                                        Error: {stats.gcs_status.error}
+                                    </p>
+                                )}
+
+                                <p className="text-xs text-muted-foreground">
+                                    Last checked:{' '}
+                                    {new Date(
+                                        stats.gcs_status.checked_at,
+                                    ).toLocaleTimeString()}
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Segmentation Agent */}
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Segmentation Agent
+                            </CardTitle>
+                            <Microscope className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                            <div className="flex items-center space-x-2">
+                                {getServiceStatusIcon(
+                                    stats.services_status.segmentation.status,
+                                )}
+                                <Badge
+                                    variant={
+                                        getServiceStatusVariant(
+                                            stats.services_status.segmentation
+                                                .status,
+                                        ) as any
+                                    }
+                                >
+                                    {stats.services_status.segmentation.status.toUpperCase()}
+                                </Badge>
+                            </div>
+
+                            <div className="space-y-1">
+                                <p className="text-xs text-muted-foreground">
+                                    {
+                                        stats.services_status.segmentation
+                                            .description
+                                    }
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                    Last checked:{' '}
+                                    {new Date(
+                                        stats.services_status.segmentation.last_check,
+                                    ).toLocaleTimeString()}
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Volumetry Agent */}
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Volumetry Agent
+                            </CardTitle>
+                            <Calculator className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                            <div className="flex items-center space-x-2">
+                                {getServiceStatusIcon(
+                                    stats.services_status.volumetry.status,
+                                )}
+                                <Badge
+                                    variant={
+                                        getServiceStatusVariant(
+                                            stats.services_status.volumetry
+                                                .status,
+                                        ) as any
+                                    }
+                                >
+                                    {stats.services_status.volumetry.status.toUpperCase()}
+                                </Badge>
+                            </div>
+
+                            <div className="space-y-1">
+                                <p className="text-xs text-muted-foreground">
+                                    {
+                                        stats.services_status.volumetry
+                                            .description
+                                    }
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                    Last checked:{' '}
+                                    {new Date(
+                                        stats.services_status.volumetry.last_check,
+                                    ).toLocaleTimeString()}
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Analysis Agent */}
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Analysis Agent
+                            </CardTitle>
+                            <Brain className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                            <div className="flex items-center space-x-2">
+                                {getServiceStatusIcon(
+                                    stats.services_status.analysis.status,
+                                )}
+                                <Badge
+                                    variant={
+                                        getServiceStatusVariant(
+                                            stats.services_status.analysis
+                                                .status,
+                                        ) as any
+                                    }
+                                >
+                                    {stats.services_status.analysis.status.toUpperCase()}
+                                </Badge>
+                            </div>
+
+                            <div className="space-y-1">
+                                <p className="text-xs text-muted-foreground">
+                                    {stats.services_status.analysis.description}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                    Last checked:{' '}
+                                    {new Date(
+                                        stats.services_status.analysis.last_check,
+                                    ).toLocaleTimeString()}
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
+
+                {/* System Stats Section */}
+                <div className="grid gap-4 md:grid-cols-2">
+                    {/* Total Patients */}
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Total Patients
+                            </CardTitle>
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">
+                                {stats.total_patients}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                Registered in the system
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    {/* Total Studies */}
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Total Studies
+                            </CardTitle>
+                            <FileText className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">
+                                {stats.total_studies}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                Medical studies created
+                            </p>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Recent Patients */}
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center justify-between">
+                            <CardTitle>Recent Patients</CardTitle>
+                            <Button variant="outline" size="sm" asChild>
+                                <Link href={index().url}>View All</Link>
+                            </Button>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        {stats.recent_patients.length > 0 ? (
+                            <div className="space-y-3">
+                                {stats.recent_patients.map((patient) => (
+                                    <div
+                                        key={patient.id}
+                                        className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
+                                    >
+                                        <div className="flex items-center space-x-3">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                                                <User className="h-4 w-4 text-primary" />
+                                            </div>
+                                            <div>
+                                                <p className="font-medium">
+                                                    {patient.first_name}{' '}
+                                                    {patient.last_name}
+                                                </p>
+                                                <p className="text-sm text-muted-foreground">
+                                                    {patient.email}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <span className="text-xs text-muted-foreground">
+                                                {new Date(
+                                                    patient.created_at,
+                                                ).toLocaleDateString()}
+                                            </span>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                asChild
+                                            >
+                                                <Link
+                                                    href={`/patients/${patient.id}`}
+                                                >
+                                                    <Eye className="h-4 w-4" />
+                                                </Link>
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="py-8 text-center">
+                                <Users className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                                <h3 className="text-lg font-semibold">
+                                    No patients yet
+                                </h3>
+                                <p className="mb-4 text-muted-foreground">
+                                    Start by adding your first patient to the
+                                    system.
+                                </p>
+                                <Button asChild>
+                                    <Link href={index().url}>
+                                        Go to Patients
+                                    </Link>
+                                </Button>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardContent className="pt-6">
+                        <div className="flex items-center justify-between text-sm text-muted-foreground">
+                            <span>System Status: All services operational</span>
+                            <span>
+                                Last updated: {new Date().toLocaleString()}
+                            </span>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
         </AppLayout>
     );

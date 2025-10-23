@@ -14,7 +14,13 @@ import { dashboard } from '@/routes';
 import { index } from '@/routes/patients';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, PersonStanding } from 'lucide-react';
+import {
+    BookOpen,
+    Folder,
+    LayoutGrid,
+    PersonStanding,
+    ScanEye,
+} from 'lucide-react';
 
 const mainNavItems: NavItem[] = [
     {
@@ -26,6 +32,11 @@ const mainNavItems: NavItem[] = [
         title: 'Patients',
         href: index(),
         icon: PersonStanding,
+    },
+    {
+        title: 'Studies',
+        href: dashboard(),
+        icon: ScanEye,
     },
 ];
 
