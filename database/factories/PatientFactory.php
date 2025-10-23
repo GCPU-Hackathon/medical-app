@@ -66,7 +66,7 @@ class PatientFactory extends Factory
             'first_name' => $this->faker->firstName(),
             'last_name' => $this->faker->lastName(),
             'date_of_birth' => $this->faker->dateTimeBetween('-90 years', '-18 years')->format('Y-m-d'),
-            'gender' => $this->faker->randomElement(['male', 'female', 'other']),
+            'gender' => $this->faker->randomElement(['male', 'female']),
             'email' => $this->faker->unique()->safeEmail(),
             'phone' => $this->faker->phoneNumber(),
             'address' => $this->faker->address(),
