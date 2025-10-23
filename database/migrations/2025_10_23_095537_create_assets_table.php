@@ -14,7 +14,12 @@ return new class extends Migration
         Schema::create('assets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('study_id')->constrained('studies');
-            $table->string('gcs_path');
+            $table->string('filename');
+            $table->string('file_path');
+            $table->bigInteger('file_size');
+            $table->string('mime_type');
+            $table->string('asset_type');
+            $table->json('metadata')->nullable();
             $table->timestamps();
         });
     }

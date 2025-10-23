@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ProcessStudyPipeline;
 use App\Models\Study;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -38,7 +39,7 @@ class StudyController extends Controller
      */
     public function show(Study $study): Response
     {
-        $study->load(['patient', 'studySteps.assets', 'assets']);
+        $study->load(['patient', 'studySteps', 'assets']);
 
         return Inertia::render('studies/show', [
             'study' => $study,
@@ -59,10 +60,14 @@ class StudyController extends Controller
             'study_date' => 'required|date',
         ]);
 
+        $validated['code'] = Study::generateCode();
+        
         $study = Study::create($validated);
 
-        return redirect()->route('studies.index')
-            ->with('success', 'Study created successfully!');
+        ProcessStudyPipeline::dispatch($study);
+
+        return redirect()->route('studies.show', $study)
+            ->with('success', 'Study created successfully and processing has been started!');
     }
 
     /**
@@ -114,5 +119,41 @@ class StudyController extends Controller
                 ], 500);
             }
         });
+    }
+
+    /**
+     * Get study data for API polling
+     */
+    public function apiShow(Study $study)
+    {
+        $study->load(['patient', 'studySteps' => function($query) {
+            $query->orderBy('step_order');
+        }]);
+        
+        return response()->json($study);
+    }
+
+    /**
+     * Cancel a running study
+     */
+    public function cancel(Study $study)
+    {
+        if ($study->status === 'in_progress') {
+            $study->update([
+                'status' => 'cancelled',
+                'processing_completed_at' => now()
+            ]);
+            
+            // Update any running steps
+            $study->studySteps()
+                ->where('status', 'in_progress')
+                ->update([
+                    'status' => 'cancelled',
+                    'completed_at' => now(),
+                    'notes' => 'Study cancelled by user'
+                ]);
+        }
+        
+        return redirect()->back()->with('success', 'Study has been cancelled.');
     }
 }

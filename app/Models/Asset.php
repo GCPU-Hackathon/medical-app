@@ -24,6 +24,7 @@ class Asset extends Model
      */
     protected $casts = [
         'study_id' => 'integer',
+        'metadata' => 'array',
     ];
 
     /**

@@ -31,6 +31,23 @@ services:
     command: redis-server --appendonly yes
     restart: unless-stopped
 
+  worker:
+    build:
+      context: .
+      args:
+        WWWUSER: 1000
+        WWWGROUP: 1000
+    container_name: medical-worker
+    depends_on:
+      - app
+      - redis
+    volumes:
+      - .:/var/www:cached
+    command: php artisan horizon:watch --without-tty
+    networks:
+      - medical-network
+    restart: unless-stopped
+
 networks:
   medical-network:
     driver: bridge

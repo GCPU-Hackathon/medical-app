@@ -25,6 +25,11 @@ class Study extends Model
      */
     protected $casts = [
         'patient_id' => 'integer',
+        'is_vr' => 'boolean',
+        'processing_status' => 'array',
+        'processing_started_at' => 'datetime',
+        'processing_completed_at' => 'datetime',
+        'study_date' => 'date',
     ];
 
     /**
@@ -56,7 +61,7 @@ class Study extends Model
      */
     public function isCompleted(): bool
     {
-        return $this->status === 'READY';
+        return $this->status === 'completed';
     }
 
     /**
@@ -64,7 +69,7 @@ class Study extends Model
      */
     public function isProcessing(): bool
     {
-        return $this->status === 'PROCESSING';
+        return $this->status === 'in_progress';
     }
 
     /**
@@ -72,14 +77,26 @@ class Study extends Model
      */
     public function isFailed(): bool
     {
-        return $this->status === 'FAILED';
+        return $this->status === 'failed';
     }
 
     /**
-     * Check if the study is new.
+     * Check if the study is pending.
      */
-    public function isNew(): bool
+    public function isPending(): bool
     {
-        return $this->status === 'NEW';
+        return $this->status === 'pending';
+    }
+
+    /**
+     * Generate a unique study code.
+     */
+    public static function generateCode(): string
+    {
+        do {
+            $code = 'STU-' . strtoupper(substr(uniqid(), -8));
+        } while (self::where('code', $code)->exists());
+
+        return $code;
     }
 }

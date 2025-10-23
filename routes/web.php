@@ -20,7 +20,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('studies', [StudyController::class, 'index'])->name('studies.index');
     Route::post('studies', [StudyController::class, 'store'])->name('studies.store');
     Route::get('studies/{study}', [StudyController::class, 'show'])->name('studies.show');
-    Route::post('studies', [StudyController::class, 'store'])->name('studies.store');
+    Route::post('studies/{study}/cancel', [StudyController::class, 'cancel'])->name('studies.cancel');
 
     // API routes for modal components
     Route::prefix('api')->group(function () {

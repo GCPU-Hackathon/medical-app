@@ -14,11 +14,13 @@ return new class extends Migration
         Schema::create('study_steps', function (Blueprint $table) {
             $table->id();
             $table->foreignId('study_id')->constrained('studies');
-            $table->enum('step_name', ['QUALITY_CHECK', 'SEGMENTATION', 'VOLUMETERY', 'LLM_ANALYSIS']);
-            $table->enum('status', ['RUNNING', 'COMPLETED', 'FAILED']);
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->enum('status', ['pending', 'in_progress', 'completed', 'failed', 'cancelled'])->default('pending');
+            $table->integer('step_order')->default(0);
             $table->datetime('started_at')->nullable();
-            $table->datetime('ended_at')->nullable();
-            $table->text('message')->nullable();
+            $table->datetime('completed_at')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }

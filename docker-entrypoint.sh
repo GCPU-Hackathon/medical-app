@@ -12,4 +12,6 @@ fi
 
 supervisord -c /etc/supervisor/conf.d/supervisord.conf
 
+php artisan horizon
+
 exec "$@"
