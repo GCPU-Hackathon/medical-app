@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: medical-app
+    volumes:
+      - .:/var/www
+      - ./storage:/var/www/storage
+      - ./bootstrap/cache:/var/www/bootstrap/cache
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_URL=http://localhost:8085
+    networks:
+      - medical-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: medical-nginx
+    ports:
+      - '8085:80'
+    volumes:
+      - .:/var/www
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - medical-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: medical-redis
+    networks:
+      - medical-network
+
+networks:
+  medical-network:
+    driver: bridge
