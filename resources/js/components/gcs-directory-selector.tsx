@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CheckCircle, Folder, RefreshCw, Search } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 interface GcsDirectory {
     name: string;
@@ -25,8 +25,13 @@ export function GcsDirectorySelector({
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const loadingRef = useRef(false);
 
-    const fetchDirectories = async () => {
+    const fetchDirectories = async (isMounted = true) => {
+        // Prevent multiple simultaneous requests
+        if (loadingRef.current) return;
+
+        loadingRef.current = true;
         setLoading(true);
         setError(null);
 
@@ -38,24 +43,42 @@ export function GcsDirectorySelector({
                 },
             });
 
+            if (!isMounted) return;
+
             if (!response.ok) {
                 throw new Error('Failed to fetch directories');
             }
 
             const data = await response.json();
-            setDirectories(data.directories || []);
+
+            if (isMounted) {
+                setDirectories(data.directories || []);
+            }
         } catch (err) {
-            setError(
-                err instanceof Error ? err.message : 'Unknown error occurred',
-            );
-            setDirectories([]);
+            if (isMounted) {
+                setError(
+                    err instanceof Error
+                        ? err.message
+                        : 'Unknown error occurred',
+                );
+                setDirectories([]);
+            }
         } finally {
-            setLoading(false);
+            if (isMounted) {
+                setLoading(false);
+            }
+            loadingRef.current = false;
         }
     };
 
     useEffect(() => {
-        fetchDirectories();
+        let isMounted = true;
+
+        fetchDirectories(isMounted);
+
+        return () => {
+            isMounted = false;
+        };
     }, []);
 
     // Filter directories based on search query
@@ -105,7 +128,7 @@ export function GcsDirectorySelector({
                 <Button
                     variant="outline"
                     size="sm"
-                    onClick={fetchDirectories}
+                    onClick={() => fetchDirectories(true)}
                     disabled={loading}
                 >
                     <RefreshCw
@@ -129,7 +152,7 @@ export function GcsDirectorySelector({
                         <div className="mb-2 text-red-600">Error: {error}</div>
                         <Button
                             variant="outline"
-                            onClick={fetchDirectories}
+                            onClick={() => fetchDirectories(true)}
                             size="sm"
                         >
                             Try Again
