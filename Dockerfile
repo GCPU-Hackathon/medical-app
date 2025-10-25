@@ -4,19 +4,13 @@ ARG WWWUSER=1000
 ARG WWWGROUP=1000
 
 RUN apt-get update && apt-get install -y \
-    libpq-dev \
-    zip \
-    unzip \
-    curl \
-    git \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    libzip-dev \
-    supervisor \
-    nginx \
-    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    libpq-dev postgresql-client zip unzip curl git \
+    libpng-dev libonig-dev libxml2-dev libzip-dev \
+    supervisor nginx \
+ && docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip \
+ && docker-php-ext-enable pdo_pgsql pgsql \
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs

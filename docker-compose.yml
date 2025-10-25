@@ -11,12 +11,11 @@ services:
       - '5173:5173'
     volumes:
       - .:/var/www:cached
-      # - /var/www/node_modules
-      # - /var/www/vendor
     depends_on:
       - redis
+      - postgres
     networks:
-      - medical-network
+      - holonauts-network
     restart: unless-stopped
 
   redis:
@@ -27,7 +26,7 @@ services:
     volumes:
       - redis-data:/data
     networks:
-      - medical-network
+      - holonauts-network
     command: redis-server --appendonly yes
     restart: unless-stopped
 
@@ -41,17 +40,58 @@ services:
     depends_on:
       - app
       - redis
+      - postgres
     volumes:
       - .:/var/www:cached
     command: php artisan horizon:watch --without-tty
     networks:
-      - medical-network
+      - holonauts-network
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: medical-postgres
+    environment:
+      POSTGRES_DB: medical_app
+      POSTGRES_USER: medical_user
+      POSTGRES_PASSWORD: medical_password123
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - holonauts-network
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: medical-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@medical-app.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+      PGADMIN_SERVER_JSON_FILE: /pgadmin4/servers.json
+    ports:
+      - '8081:80'
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+      - ./pgadmin-servers.json:/pgadmin4/servers.json
+    depends_on:
+      - postgres
+    networks:
+      - holonauts-network
     restart: unless-stopped
 
 networks:
-  medical-network:
+  holonauts-network:
+    name: holonauts-network
     driver: bridge
 
 volumes:
   redis-data:
+    driver: local
+  postgres-data:
+    driver: local
+  pgadmin-data:
     driver: local

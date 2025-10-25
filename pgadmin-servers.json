@@ -1,0 +1,15 @@
+{
+    "Servers": {
+        "1": {
+            "Name": "Medical App PostgreSQL",
+            "Group": "Servers",
+            "Host": "postgres",
+            "Port": 5432,
+            "MaintenanceDB": "medical_app",
+            "Username": "medical_user",
+            "Password": "medical_password123",
+            "SSLMode": "prefer",
+            "Favorite": true
+        }
+    }
+}
