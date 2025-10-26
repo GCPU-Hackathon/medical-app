@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class ProcessVolumetry implements ShouldQueue
@@ -41,16 +42,58 @@ class ProcessVolumetry implements ShouldQueue
         ]);
 
         try {
-            Log::info("Starting volumetry processing for Study: {$this->study->study_code}");
+            Log::info("Starting volumetry processing for Study: {$this->study->code}");
             
-            // Fake processing for 20 seconds
-            sleep(20);
+            // Find the segmentation file from assets
+            $segmentationAsset = $this->study->assets()
+                ->where('asset_type', 'segmentation')
+                ->first();
             
-            // Always fail after the fake processing
-            throw new \Exception("Volumetry processing failed: Unable to calculate volumes from segmentation data");
+            if (!$segmentationAsset) {
+                throw new \Exception("No segmentation file found for study {$this->study->code}");
+            }
+            
+            // Call volumetry agent API
+            $response = Http::timeout(60)
+                ->retry(3, 100)
+                ->post('http://volumetry-agent:8000/analyze', [
+                    'study_code' => $this->study->code,
+                    'filename' => $segmentationAsset->filename
+                ]);
+            
+            if (!$response->successful()) {
+                throw new \Exception(
+                    "Volumetry API failed: " . $response->body()
+                );
+            }
+            
+            $result = $response->json();
+            
+            // Check if metrics were saved successfully
+            if ($result['status'] !== 'success' || !$result['metrics_saved']) {
+                throw new \Exception(
+                    "Volumetry processing failed: " . ($result['message'] ?? 'Unknown error')
+                );
+            }
+
+            sleep(5);
+            
+            Log::info("Volumetry API response", [
+                'study_code' => $this->study->code,
+                'result' => $result
+            ]);
+            
+            // Update step as completed
+            $step->update([
+                'status' => 'completed',
+                'completed_at' => now(),
+                'notes' => "Volumetry completed successfully. " . $result['message'],
+            ]);
+
+            Log::info("Volumetry completed successfully for Study: {$this->study->code}");
             
         } catch (\Exception $e) {
-            Log::error("Volumetry processing failed for Study: {$this->study->study_code}", [
+            Log::error("Volumetry processing failed for Study: {$this->study->code}", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -79,6 +122,6 @@ class ProcessVolumetry implements ShouldQueue
      */
     public function tags(): array
     {
-        return ['volumetry', "study:{$this->study->study_code}"];
+        return ['volumetry', "study:{$this->study->code}"];
     }
 }
