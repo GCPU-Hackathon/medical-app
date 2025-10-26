@@ -65,7 +65,7 @@ class DashboardController extends Controller
      */
     private function checkAnalysisService(): array
     {
-        return HealthCheckService::checkServiceHealth('http://analysis:8000/health', 10);
+        return HealthCheckService::checkServiceHealth('http://medchatbot:8000/health', 10);
     }
 
     /**
