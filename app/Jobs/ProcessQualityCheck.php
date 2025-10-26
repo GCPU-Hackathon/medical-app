@@ -46,12 +46,10 @@ class ProcessQualityCheck implements ShouldQueue
             
             // Step 1: Download all gz files from GCS directory
             $gzFiles = $this->downloadGzFilesFromGCS();
-            // Step 2: Extract each gz file to get .nii files
-            $niiFiles = $this->extractAllGzFiles($gzFiles);
-            // Step 3: Check if files are in correct format (*-t2w.nii, *-t1c.nii, *-t1n.nii, *-t2f.nii)
-            $this->validateNiiFiles($niiFiles);
-            // Step 4: Link the assets using Asset model and store all files
-            $this->createAssetRecords($niiFiles);
+            // Step 2: Check if files are in correct format (*-t2w.nii.gz, *-t1c.nii.gz, *-t1n.nii.gz, *-t2f.nii.gz)
+            $this->validateNiiFiles($gzFiles);
+            // Step 3: Link the assets using Asset model and store all files
+            $this->createAssetRecords($gzFiles);
             
             $step->update([
                 'status' => 'completed',
@@ -136,63 +134,16 @@ class ProcessQualityCheck implements ShouldQueue
         
         return $localGzFiles;
     }
-
-    private function extractAllGzFiles(array $gzFiles): array
-    {
-        $niiFiles = [];
-        $localDisk = Storage::disk('local');
-        
-        foreach ($gzFiles as $gzFile) {
-            $gzFileName = basename($gzFile, '.gz');
-            $extractDir = "studies/{$this->study->code}/extracted";
-            
-            // Create extraction directory
-            $localDisk->makeDirectory($extractDir);
-            
-            // Extract gz file using gzopen
-            $extractedFilePath = $localDisk->path("{$extractDir}/{$gzFileName}");
-            
-            $gzHandle = gzopen($gzFile, 'rb');
-            if ($gzHandle === false) {
-                throw new \Exception("Failed to open gz file: {$gzFile}");
-            }
-            
-            $outputHandle = fopen($extractedFilePath, 'wb');
-            if ($outputHandle === false) {
-                gzclose($gzHandle);
-                throw new \Exception("Failed to create output file: {$extractedFilePath}");
-            }
-            
-            // Extract the compressed data
-            while (!gzeof($gzHandle)) {
-                $data = gzread($gzHandle, 8192);
-                fwrite($outputHandle, $data);
-            }
-            
-            gzclose($gzHandle);
-            fclose($outputHandle);
-            
-            // Check if the extracted file is a .nii file
-            if (str_ends_with($gzFileName, '.nii')) {
-                $niiFiles[] = $extractedFilePath;
-                Log::info("Extracted gz file: {$gzFile} to {$extractedFilePath}");
-            } else {
-                Log::warning("Extracted file is not a .nii file: {$extractedFilePath}");
-            }
-        }
-        
-        return $niiFiles;
-    }
     
-    private function validateNiiFiles(array $niiFiles): void
+    private function validateNiiFiles(array $gzFiles): void
     {
         $requiredTypes = ['t1c', 't1n', 't2w', 't2f'];
         $foundTypes = [];
         
-        foreach ($niiFiles as $file) {
+        foreach ($gzFiles as $file) {
             $filename = basename($file);
             foreach ($requiredTypes as $type) {
-                if (str_contains($filename, "-{$type}.nii")) {
+                if (str_contains($filename, "-{$type}.nii.gz")) {
                     $foundTypes[] = $type;
                     break;
                 }
@@ -207,9 +158,9 @@ class ProcessQualityCheck implements ShouldQueue
         Log::info("All required NII file types found: " . implode(', ', $foundTypes));
     }
     
-    private function createAssetRecords(array $niiFiles): void
+    private function createAssetRecords(array $gzFiles): void
     {
-        foreach ($niiFiles as $filePath) {
+        foreach ($gzFiles as $filePath) {
             $filename = basename($filePath);
             $fileSize = filesize($filePath);
             
@@ -217,7 +168,7 @@ class ProcessQualityCheck implements ShouldQueue
             $assetType = 'unknown';
             $requiredTypes = ['t1c', 't1n', 't2w', 't2f'];
             foreach ($requiredTypes as $type) {
-                if (str_contains($filename, "-{$type}.nii")) {
+                if (str_contains($filename, "-{$type}.nii.gz")) {
                     $assetType = $type;
                     break;
                 }
@@ -231,7 +182,7 @@ class ProcessQualityCheck implements ShouldQueue
                 'filename' => $filename,
                 'file_path' => $relativePath,
                 'file_size' => $fileSize,
-                'mime_type' => 'application/octet-stream',
+                'mime_type' => 'application/gzip',
                 'asset_type' => $assetType,
                 'metadata' => [
                     'original_gcs_directory' => $this->study->gcs_directory,
