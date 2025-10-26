@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\ProcessStudyPipeline;
-use App\Models\Study;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
+use App\Models\Study;
 use Inertia\Response;
+use Illuminate\Http\Request;
+use App\Jobs\ProcessStudyPipeline;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 class StudyController extends Controller
 {
@@ -185,7 +186,7 @@ class StudyController extends Controller
             // 4. Send notification to VR system
             
             // For now, we'll just simulate the process
-            \Log::info("Study {$study->code} sent to VR platform", [
+            Log::info("Study {$study->code} sent to VR platform", [
                 'study_id' => $study->id,
                 'assets_count' => $study->assets()->count(),
                 'patient' => $study->patient->name
@@ -197,7 +198,7 @@ class StudyController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error("Failed to send study {$study->code} to VR platform", [
+            Log::error("Failed to send study {$study->code} to VR platform", [
                 'study_id' => $study->id,
                 'error' => $e->getMessage()
             ]);

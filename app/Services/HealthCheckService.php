@@ -20,7 +20,7 @@ class HealthCheckService
                 $data = $response->json();
                 
                 // Check if response has the expected format
-                if (isset($data['status']) && $data['status'] === 'ok') {
+                if (isset($data['status']) && $data['status'] === 'healthy') {
                     return [
                         'status' => 'online',
                         'message' => $data['message'] ?? 'Service is healthy',

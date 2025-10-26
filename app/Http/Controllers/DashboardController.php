@@ -45,35 +45,6 @@ class DashboardController extends Controller
     }
 
     /**
-     * Check internal services status
-     */
-    private function checkInternalServices(): array
-    {
-        $serviceConfigs = [
-            'segmentation' => [
-                'name' => 'Segmentation Agent',
-                'description' => 'Medical image segmentation service',
-                'url' => 'http://brats:8000/health',
-                'timeout' => 10,
-            ],
-            'volumetry' => [
-                'name' => 'Volumetry Agent',
-                'description' => 'Volume measurement analysis service',
-                'url' => 'http://volumetry:8000/health',
-                'timeout' => 10,
-            ],
-            'analysis' => [
-                'name' => 'Analysis Agent',
-                'description' => 'AI-powered medical analysis service',
-                'url' => 'http://analysis:8000/health',
-                'timeout' => 10,
-            ],
-        ];
-
-        return HealthCheckService::checkMultipleServices($serviceConfigs);
-    }
-
-    /**
      * Check segmentation service only
      */
     private function checkSegmentationService(): array
@@ -86,7 +57,7 @@ class DashboardController extends Controller
      */
     private function checkVolumetryService(): array
     {
-        return HealthCheckService::checkServiceHealth('http://volumetry:8000/health', 10);
+        return HealthCheckService::checkServiceHealth('http://volumetry-agent:8000/health', 10);
     }
 
     /**
