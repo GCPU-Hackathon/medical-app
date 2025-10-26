@@ -46,7 +46,7 @@ class ProcessSegmentation implements ShouldQueue
             Log::info("Starting segmentation processing for Study: {$this->study->code}");
             
             // 1. Appeler l'API FastAPI pour démarrer la segmentation
-            $taskId = $this->startSegmentation(['study_code' => $this->study->code]);
+            $taskId = $this->startSegmentation(['study_code' => $this->study->code, 'simulate' => true]);
             
             Log::info("Segmentation task started", [
                 'study_code' => $this->study->code,
