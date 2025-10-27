@@ -209,4 +209,21 @@ class StudyController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Download an asset file
+     */
+    public function downloadAsset(Study $study, $assetId)
+    {
+        $asset = $study->assets()->findOrFail($assetId);
+        
+        $filePath = $asset->file_path;
+        $storage = Storage::disk('local');
+        
+        if (!$storage->exists($filePath)) {
+            abort(404, 'File not found');
+        }
+        
+        return $storage->download($filePath, $asset->filename);
+    }
 }

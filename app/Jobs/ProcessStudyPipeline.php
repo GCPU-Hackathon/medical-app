@@ -53,13 +53,12 @@ class ProcessStudyPipeline implements ShouldQueue
                 ]);
             }
 
-            // Dispatch the processing chain
             ProcessQualityCheck::dispatch($this->study)
                 ->chain([
                     new ProcessSegmentation($this->study),
                     new ProcessVolumetry($this->study),
                     new ProcessLLMAnalysis($this->study),
-                    new FinalizeStudy($this->study),
+                    new ProcessVRPreparation($this->study)
                 ]);
                 
             Log::info("Processing pipeline chain dispatched for Study ID: {$this->study->id}");

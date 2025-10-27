@@ -636,6 +636,13 @@ export default function StudyShow({ study: initialStudy }: Props) {
                                                         size="sm"
                                                         className="h-6 w-6 p-0"
                                                         title="Download"
+                                                        onClick={() => {
+                                                            const downloadUrl = `/studies/${study.id}/assets/${asset.id}/download`;
+                                                            window.open(
+                                                                downloadUrl,
+                                                                '_blank',
+                                                            );
+                                                        }}
                                                     >
                                                         <Download className="h-3 w-3" />
                                                     </Button>
