@@ -31,9 +31,4 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
-Route::get('/test', function(){
-    $files = Storage::disk('gcs')->files();
-    dd($files);
-});
-
 require __DIR__.'/settings.php';

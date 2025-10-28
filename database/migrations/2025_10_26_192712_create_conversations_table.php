@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('conversations', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignId('study_id')->constrained('studies')->onDelete('cascade');
+            $table->string('study_id')->constrained('studies')->onDelete('cascade');
             $table->text('system_prompt')->nullable();
         });
     }
