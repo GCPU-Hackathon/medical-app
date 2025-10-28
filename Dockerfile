@@ -30,10 +30,8 @@ RUN sed -i 's/^listen = 127.0.0.1:9000/listen = 0.0.0.0:9000/' /usr/local/etc/ph
     && sed -i 's/^user = www-data/user = core/' /usr/local/etc/php-fpm.d/www.conf \
     && sed -i 's/^group = www-data/group = core/' /usr/local/etc/php-fpm.d/www.conf
 
-# Configure nginx to run as core user on port 8080
-RUN sed -i 's/user www-data;/user core;/' /etc/nginx/nginx.conf \
-    && sed -i 's/listen 80;/listen 8080;/' /etc/nginx/sites-available/default \
-    && sed -i 's/listen \[::\]:80;/listen [::]:8080;/' /etc/nginx/sites-available/default
+# Configure nginx to run as core user on standard ports
+RUN sed -i 's/user www-data;/user core;/' /etc/nginx/nginx.conf
 
 # Create necessary directories and give core user permissions
 RUN mkdir -p /var/log/supervisor \
@@ -76,7 +74,7 @@ USER core
 RUN composer install --no-interaction --prefer-dist || true
 RUN npm install || true
 
-EXPOSE 8080 5173
+EXPOSE 80 443 5173
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 
