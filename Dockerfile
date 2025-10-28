@@ -53,13 +53,13 @@ WORKDIR /var/www
 # Copy application files
 COPY --chown=core:core . .
 
-# Create Laravel directories and set permissions
+# Create Laravel directories and set permissions (if possible)
 RUN mkdir -p /var/www/storage/logs \
     && mkdir -p /var/www/bootstrap/cache \
-    && chown -R core:core /var/www/storage \
-    && chown -R core:core /var/www/bootstrap/cache \
-    && chmod -R 775 /var/www/storage \
-    && chmod -R 775 /var/www/bootstrap/cache
+    && (chown -R core:core /var/www/storage || true) \
+    && (chown -R core:core /var/www/bootstrap/cache || true) \
+    && (chmod -R 775 /var/www/storage || true) \
+    && (chmod -R 775 /var/www/bootstrap/cache || true)
 
 # Copy configuration files
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
