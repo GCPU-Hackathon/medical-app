@@ -17,6 +17,8 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 
 RUN pecl install redis && docker-php-ext-enable redis
 
+RUN pecl install mongodb && docker-php-ext-enable mongodb
+
 RUN groupadd --force -g $WWWGROUP core \
     && useradd -u $WWWUSER -g core -m -s /bin/bash core
 
@@ -28,8 +30,10 @@ RUN sed -i 's/^listen = 127.0.0.1:9000/listen = 0.0.0.0:9000/' /usr/local/etc/ph
     && sed -i 's/^user = www-data/user = core/' /usr/local/etc/php-fpm.d/www.conf \
     && sed -i 's/^group = www-data/group = core/' /usr/local/etc/php-fpm.d/www.conf
 
-# Configure nginx to run as core user on standard ports
-RUN sed -i 's/user www-data;/user core;/' /etc/nginx/nginx.conf
+# Configure nginx to run as core user on port 8080
+RUN sed -i 's/user www-data;/user core;/' /etc/nginx/nginx.conf \
+    && sed -i 's/listen 80;/listen 8080;/' /etc/nginx/sites-available/default \
+    && sed -i 's/listen \[::\]:80;/listen [::]:8080;/' /etc/nginx/sites-available/default
 
 # Create necessary directories and give core user permissions
 RUN mkdir -p /var/log/supervisor \
@@ -51,24 +55,18 @@ WORKDIR /var/www
 # Copy application files
 COPY --chown=core:core . .
 
-# Fix git ownership issue for Google Cloud
-RUN git config --global --add safe.directory /var/www || true
-
-# Create Laravel directories and set permissions (if possible)
+# Create Laravel directories and set permissions
 RUN mkdir -p /var/www/storage/logs \
     && mkdir -p /var/www/bootstrap/cache \
-    && mkdir -p /var/www/vendor \
-    && (chown -R core:core /var/www/storage || true) \
-    && (chown -R core:core /var/www/bootstrap/cache || true) \
-    && (chown -R core:core /var/www/vendor || true) 
-    # && (chmod -R 775 /var/www/storage || true) \
-    # && (chmod -R 775 /var/www/bootstrap/cache || true) \
-    # && (chmod -R 775 /var/www/vendor || true)
+    && chown -R core:core /var/www/storage \
+    && chown -R core:core /var/www/bootstrap/cache \
+    && chmod -R 775 /var/www/storage \
+    && chmod -R 775 /var/www/bootstrap/cache
 
 # Copy configuration files
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY nginx.conf /etc/nginx/sites-available/default
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY docker/nginx.conf /etc/nginx/sites-available/default
+COPY docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh \
     && chown core:core /usr/local/bin/docker-entrypoint.sh
@@ -78,7 +76,7 @@ USER core
 RUN composer install --no-interaction --prefer-dist || true
 RUN npm install || true
 
-EXPOSE 80 443 5173
+EXPOSE 8080 5173
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 
