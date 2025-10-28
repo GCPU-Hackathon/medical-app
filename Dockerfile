@@ -17,8 +17,6 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 
 RUN pecl install redis && docker-php-ext-enable redis
 
-RUN pecl install mongodb && docker-php-ext-enable mongodb
-
 RUN groupadd --force -g $WWWGROUP core \
     && useradd -u $WWWUSER -g core -m -s /bin/bash core
 

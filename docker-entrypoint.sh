@@ -1,25 +1,42 @@
 #!/bin/sh
 set -e
 
+echo "Starting entrypoint script..."
+
+# Fix git ownership
 git config --global --add safe.directory /var/www || true
 
-mkdir -p vendor storage/logs storage/framework/{cache,sessions,views} bootstrap/cache || true
+# Create necessary directories
+mkdir -p storage/logs storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache || true
 
-if [ ! -d vendor ]; then
-  echo "Vendor directory not found. Installing Composer dependencies..."
-  composer install --no-interaction --prefer-dist || true
-  cp .env.example .env || true
-  php artisan key:generate || true
+# Check if vendor/autoload.php exists, not just vendor directory
+if [ ! -f vendor/autoload.php ]; then
+  echo "Composer autoload not found. Installing dependencies..."
+  composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader
+  
+  # Setup .env if it doesn't exist
+  if [ ! -f .env ]; then
+    echo "Creating .env file..."
+    cp .env.example .env || true
+    php artisan key:generate || true
+  fi
+  
+  echo "Running migrations..."
   php artisan migrate --force || true
   php artisan db:seed || true
 fi
 
-# Create storage link for public access
+# Create storage link
 echo "Creating storage link..."
-php artisan storage:link
+php artisan storage:link || true
 
-supervisord -c /etc/supervisor/conf.d/supervisord.conf
+# Start supervisor in background
+echo "Starting supervisor..."
+supervisord -c /etc/supervisor/conf.d/supervisord.conf &
 
-php artisan horizon
+# Give supervisor time to start
+sleep 3
 
-exec "$@"
+# Start horizon
+echo "Starting Horizon..."
+exec php artisan horizon
