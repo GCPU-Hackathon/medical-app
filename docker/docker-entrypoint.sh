@@ -11,14 +11,14 @@ echo "Waiting for dependencies..."
 sleep 2
 
 # Create storage directories if they don't exist
-mkdir -p storage/logs storage/framework/{cache,sessions,views} bootstrap/cache
+mkdir -p storage/logs storage/framework/{cache,sessions,views} bootstrap/cache storage/app/public
 
-# Set proper permissions for Laravel directories
-chmod -R 775 storage bootstrap/cache
-chown -R core:core storage bootstrap/cache
+# Set permissions ONLY for directories we own (exclude mounted volumes)
+# Use || true to continue even if some operations fail
+chmod -R 775 storage/logs storage/framework bootstrap/cache storage/app/public 2>/dev/null || true
 
 # Only run initial setup if vendor directory doesn't exist
-if [ ! -d "vendor" ]; then
+if [ ! -d "vendor" ] || [ ! -f "vendor/autoload.php" ]; then
     echo "First time setup - installing dependencies..."
     
     # Install Composer dependencies
@@ -47,6 +47,9 @@ if [ ! -d "vendor" ]; then
         echo "Skipping migrations - database not configured or not available"
     fi
 fi
+
+# Create storage link if it doesn't exist
+php artisan storage:link || echo "Storage link already exists or failed"
 
 # Clear Laravel caches (always run this)
 echo "Clearing Laravel caches..."
