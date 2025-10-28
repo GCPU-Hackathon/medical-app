@@ -4,7 +4,7 @@ services:
       context: .
       args:
         WWWUSER: ${UID:-1000}
-        WWWGROUP: ${UID:-1000}
+        WWWGROUP: ${GID:-1000}
     container_name: medical-app
     ports:
       - '8085:8080'
