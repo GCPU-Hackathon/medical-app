@@ -62,10 +62,10 @@ RUN mkdir -p /var/www/storage/logs \
     && mkdir -p /var/www/vendor \
     && (chown -R core:core /var/www/storage || true) \
     && (chown -R core:core /var/www/bootstrap/cache || true) \
-    && (chown -R core:core /var/www/vendor || true) \
-    && (chmod -R 775 /var/www/storage || true) \
-    && (chmod -R 775 /var/www/bootstrap/cache || true) \
-    && (chmod -R 775 /var/www/vendor || true)
+    && (chown -R core:core /var/www/vendor || true) 
+    # && (chmod -R 775 /var/www/storage || true) \
+    # && (chmod -R 775 /var/www/bootstrap/cache || true) \
+    # && (chmod -R 775 /var/www/vendor || true)
 
 # Copy configuration files
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
