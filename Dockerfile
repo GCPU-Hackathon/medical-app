@@ -53,13 +53,19 @@ WORKDIR /var/www
 # Copy application files
 COPY --chown=core:core . .
 
+# Fix git ownership issue for Google Cloud
+RUN git config --global --add safe.directory /var/www || true
+
 # Create Laravel directories and set permissions (if possible)
 RUN mkdir -p /var/www/storage/logs \
     && mkdir -p /var/www/bootstrap/cache \
+    && mkdir -p /var/www/vendor \
     && (chown -R core:core /var/www/storage || true) \
     && (chown -R core:core /var/www/bootstrap/cache || true) \
+    && (chown -R core:core /var/www/vendor || true) \
     && (chmod -R 775 /var/www/storage || true) \
-    && (chmod -R 775 /var/www/bootstrap/cache || true)
+    && (chmod -R 775 /var/www/bootstrap/cache || true) \
+    && (chmod -R 775 /var/www/vendor || true)
 
 # Copy configuration files
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
