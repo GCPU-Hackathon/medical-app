@@ -17,7 +17,7 @@ class ProcessLLMAnalysis implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $timeout = 60;
+    public $timeout = 300; // 5 minutes max for entire job
     public $tries = 1;
 
     /**
@@ -45,17 +45,34 @@ class ProcessLLMAnalysis implements ShouldQueue
         try {
             Log::info("Starting LLM analysis for Study: {$this->study->code}");
             
-            // Send request to medchatbot to start conversation
-            $response = Http::timeout(60)
-                ->retry(3, 100)
+            // Send request to medchatbot to start conversation with aggressive timeout
+            Log::info("Sending request to medchatbot service", [
+                'study_code' => $this->study->code,
+                'endpoint' => 'http://medchatbot:8000/conversation/start'
+            ]);
+            
+            $response = Http::timeout(80) // Reduced timeout to 30 seconds
                 ->post('http://medchatbot:8000/conversation/start', [
                     'study_id' => $this->study->id,
                     'study_code' => $this->study->code
                 ]);
             
+            Log::info("Received response from medchatbot service", [
+                'study_code' => $this->study->code,
+                'status' => $response->status(),
+                'successful' => $response->successful()
+            ]);
+            
             if (!$response->successful()) {
+                Log::error("LLM Analysis API request failed", [
+                    'study_code' => $this->study->code,
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                    'headers' => $response->headers()
+                ]);
+                
                 throw new \Exception(
-                    "LLM Analysis API failed: " . $response->body()
+                    "LLM Analysis API failed with status {$response->status()}: " . $response->body()
                 );
             }
             
