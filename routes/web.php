@@ -34,4 +34,9 @@ Route::middleware(['auth'])->group(function () {
 // Public API routes (no auth required)
 Route::get('/active', [StudyController::class, 'active'])->name('api.studies.active');
 
+// Private storage file serving route (with auth for web users, but we'll make it public for VR API)
+Route::get('/private-storage/{path}', [StudyController::class, 'servePrivateFile'])
+    ->where('path', '.*')
+    ->name('private.storage');
+
 require __DIR__.'/settings.php';

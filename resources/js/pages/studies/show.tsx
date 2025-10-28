@@ -31,6 +31,8 @@ interface StudyStep {
 interface Asset {
     id: number;
     filename: string;
+    file_path: string;
+    asset_type: string;
     type: string;
     gcs_path: string;
     file_size: number;
@@ -662,7 +664,13 @@ export default function StudyShow({ study: initialStudy }: Props) {
                                                         className="h-6 w-6 p-0"
                                                         title="Download"
                                                         onClick={() => {
-                                                            const downloadUrl = `/studies/${study.id}/assets/${asset.id}/download`;
+                                                            // Remove 'storage/' and 'private/' prefixes if they exist in the file_path
+                                                            const cleanPath =
+                                                                asset.file_path.replace(
+                                                                    /^(storage\/|private\/)+/,
+                                                                    '',
+                                                                );
+                                                            const downloadUrl = `/private-storage/${cleanPath}`;
                                                             window.open(
                                                                 downloadUrl,
                                                                 '_blank',

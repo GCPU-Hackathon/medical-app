@@ -223,9 +223,9 @@ class StudyController extends Controller
                 ->where('is_vr', true)
                 ->get()
                 ->map(function ($study) {
-                    // Add download URLs to assets
                     $study->assets = $study->assets->map(function ($asset) use ($study) {
-                        $asset->download_url = url("/studies/{$study->id}/assets/{$asset->id}/download");
+                        $cleanPath = str_replace(['storage/', 'private/'], '', $asset->file_path);
+                        $asset->download_url = url("/private-storage/{$cleanPath}");
                         return $asset;
                     });
                     
@@ -250,5 +250,25 @@ class StudyController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Serve private storage files with authentication
+     */
+    public function servePrivateFile($path)
+    {
+        $storage = Storage::disk('local');
+        
+        if (!$storage->exists($path)) {
+            abort(404, 'File not found');
+        }
+        
+        $mimeType = $storage->mimeType($path);
+        $filename = basename($path);
+        
+        return response()->file($storage->path($path), [
+            'Content-Type' => $mimeType,
+            'Content-Disposition' => 'inline; filename="' . $filename . '"'
+        ]);
     }
 }
