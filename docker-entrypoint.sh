@@ -29,14 +29,3 @@ fi
 # Create storage link
 echo "Creating storage link..."
 php artisan storage:link || true
-
-# Start supervisor in background
-echo "Starting supervisor..."
-supervisord -c /etc/supervisor/conf.d/supervisord.conf &
-
-# Give supervisor time to start
-sleep 3
-
-# Start horizon
-echo "Starting Horizon..."
-exec php artisan horizon
