@@ -62,9 +62,9 @@ RUN mkdir -p /var/www/storage/logs \
     && (chmod -R 775 /var/www/bootstrap/cache || true)
 
 # Copy configuration files
-COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY docker/nginx.conf /etc/nginx/sites-available/default
-COPY docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY nginx.conf /etc/nginx/sites-available/default
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh \
     && chown core:core /usr/local/bin/docker-entrypoint.sh
