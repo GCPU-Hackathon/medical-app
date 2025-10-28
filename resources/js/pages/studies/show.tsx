@@ -50,6 +50,7 @@ interface Study {
     processing_started_at: string | null;
     processing_completed_at: string | null;
     processing_errors: any;
+    is_vr: boolean;
     patient: {
         id: number;
         first_name: string;
@@ -201,6 +202,30 @@ export default function StudyShow({ study: initialStudy }: Props) {
 
                 <div className="grid grid-cols-1 gap-6 p-4 lg:grid-cols-4">
                     <div className="lg:col-span-3">
+                        {study.is_vr && (
+                            <Card className="mb-7 border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50 dark:border-purple-800 dark:from-purple-900/20 dark:to-indigo-900/20">
+                                <CardContent className="p-4">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30">
+                                            <span className="text-lg">🥽</span>
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="font-semibold text-purple-900 dark:text-purple-100">
+                                                VR-Enabled Study
+                                            </h3>
+                                            <p className="text-sm text-purple-700 dark:text-purple-300">
+                                                This study is available for VR
+                                                visualization and accessible
+                                                through the VR platform API
+                                            </p>
+                                        </div>
+                                        <Badge className="bg-purple-600 hover:bg-purple-700">
+                                            VR Active
+                                        </Badge>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
                         <Card className="min-h-[600px]">
                             <CardHeader>
                                 <CardTitle className="flex items-center justify-between">

@@ -31,4 +31,7 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
+// Public API routes (no auth required)
+Route::get('/active', [StudyController::class, 'active'])->name('api.studies.active');
+
 require __DIR__.'/settings.php';

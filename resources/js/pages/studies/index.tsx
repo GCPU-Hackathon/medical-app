@@ -35,6 +35,7 @@ interface Study {
     patient: Patient;
     study_steps_count?: number;
     assets_count?: number;
+    is_vr?: boolean;
 }
 
 interface Props {
@@ -176,9 +177,19 @@ export default function StudiesIndex({ studies, stats }: Props) {
                                 {studies.data.map((study) => (
                                     <TableRow key={study.id}>
                                         <TableCell className="font-medium">
-                                            <div>
-                                                <div className="font-semibold">
-                                                    {study.code}
+                                            <div className="flex items-center gap-2">
+                                                <div>
+                                                    <div className="font-semibold">
+                                                        {study.code}
+                                                    </div>
+                                                    {study.is_vr && (
+                                                        <Badge
+                                                            className="mt-1 bg-purple-100 text-purple-700 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300"
+                                                            variant="secondary"
+                                                        >
+                                                            🥽 VR Ready
+                                                        </Badge>
+                                                    )}
                                                 </div>
                                             </div>
                                         </TableCell>

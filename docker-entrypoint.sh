@@ -10,6 +10,10 @@ if [ ! -d vendor ]; then
   php artisan db:seed
 fi
 
+# Create storage link for public access
+echo "Creating storage link..."
+php artisan storage:link
+
 supervisord -c /etc/supervisor/conf.d/supervisord.conf
 
 php artisan horizon

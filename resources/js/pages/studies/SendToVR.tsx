@@ -19,6 +19,7 @@ interface Study {
     status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
     patient: Patient;
     assets_count?: number;
+    is_vr?: boolean;
 }
 
 interface SendToVRProps {
@@ -29,34 +30,25 @@ export const SendToVR = ({ study }: SendToVRProps) => {
     const [isSending, setIsSending] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
 
-    const handleSendToVR = async () => {
+    const handleSendToVR = () => {
         setIsSending(true);
 
-        try {
-            // Simulate API call - replace with actual endpoint
-            router.post(
-                `/studies/${study.id}/send-to-vr`,
-                {},
-                {
-                    onSuccess: () => {
-                        setIsSuccess(true);
-                        setTimeout(() => {
-                            setIsSuccess(false);
-                            setIsSending(false);
-                        }, 2000);
-                    },
-                    onError: () => {
-                        setIsSending(false);
-                    },
-                    onFinish: () => {
-                        // Will be called after onSuccess or onError
-                    },
+        router.post(
+            `/studies/${study.id}/send-to-vr`,
+            {},
+            {
+                onSuccess: () => {
+                    setIsSuccess(true);
+                    setTimeout(() => {
+                        router.reload();
+                    }, 1500);
                 },
-            );
-        } catch (error) {
-            console.error('Error sending to VR:', error);
-            setIsSending(false);
-        }
+                onError: (errors) => {
+                    console.error('Error enabling VR:', errors);
+                    setIsSending(false);
+                },
+            },
+        );
     };
 
     const getStatusColor = (status: string) => {
@@ -94,7 +86,7 @@ export const SendToVR = ({ study }: SendToVRProps) => {
             <Card className="border-0 shadow-none">
                 <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
-                        <span>Send Study to VR Platform</span>
+                        <span>Enable Study for VR Platform</span>
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -103,7 +95,8 @@ export const SendToVR = ({ study }: SendToVRProps) => {
                             <div className="flex items-center gap-2">
                                 <AlertTriangle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
                                 <span className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
-                                    Study must be completed before sending to VR
+                                    Study must be completed before enabling VR
+                                    access
                                 </span>
                             </div>
                         </div>
@@ -114,12 +107,12 @@ export const SendToVR = ({ study }: SendToVRProps) => {
                                 <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
                             </div>
                             <h3 className="mb-2 text-lg font-semibold text-green-900 dark:text-green-100">
-                                Successfully Sent to VR!
+                                Successfully Enabled for VR!
                             </h3>
                             <p className="text-sm text-green-700 dark:text-green-300">
-                                Study {study.code} has been processed and sent
-                                to the VR platform. You can now access it in
-                                your VR environment.
+                                Study {study.code} has been enabled for VR
+                                access. You can now access it through the VR
+                                platform API.
                             </p>
                         </div>
                     ) : (
@@ -160,12 +153,12 @@ export const SendToVR = ({ study }: SendToVRProps) => {
                                             <span className="mr-2 animate-spin">
                                                 ⏳
                                             </span>
-                                            Sending to VR...
+                                            Enabling VR...
                                         </>
                                     ) : (
                                         <>
                                             <Send className="mr-2 h-4 w-4" />
-                                            Send to VR
+                                            Enable VR Access
                                         </>
                                     )}
                                 </Button>
