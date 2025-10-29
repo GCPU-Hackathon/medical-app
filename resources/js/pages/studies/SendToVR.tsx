@@ -101,6 +101,7 @@ export const SendToVR = ({ study }: SendToVRProps) => {
                             </div>
                         </div>
                     )}
+
                     {isSuccess ? (
                         <div className="flex flex-col items-center justify-center py-8 text-center">
                             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">

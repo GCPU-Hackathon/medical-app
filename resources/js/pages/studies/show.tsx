@@ -221,9 +221,30 @@ export default function StudyShow({ study: initialStudy }: Props) {
                                                 through the VR platform API
                                             </p>
                                         </div>
-                                        <Badge className="bg-purple-600 hover:bg-purple-700">
-                                            VR Active
-                                        </Badge>
+                                        <div className="flex items-center space-x-2">
+                                            <Badge className="bg-purple-600 hover:bg-purple-700">
+                                                VR Active
+                                            </Badge>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => {
+                                                    if (
+                                                        confirm(
+                                                            'Are you sure you want to stop VR access for this study?',
+                                                        )
+                                                    ) {
+                                                        router.post(
+                                                            `/studies/${study.id}/disable-vr`,
+                                                        );
+                                                    }
+                                                }}
+                                                className="border-purple-300 text-purple-700 hover:bg-purple-100 dark:border-purple-600 dark:text-purple-300 dark:hover:bg-purple-900/20"
+                                            >
+                                                <X className="mr-1 h-3 w-3" />
+                                                Stop VR
+                                            </Button>
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>

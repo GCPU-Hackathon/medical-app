@@ -29,6 +29,7 @@ class Study extends Model
         'processing_status' => 'array',
         'processing_started_at' => 'datetime',
         'processing_completed_at' => 'datetime',
+        'vr_sent_at' => 'datetime',
         'study_date' => 'date',
     ];
 

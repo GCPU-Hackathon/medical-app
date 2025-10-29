@@ -14,9 +14,9 @@ import { Create } from '@/pages/studies/Create';
 import { SendToVR } from '@/pages/studies/SendToVR';
 import { index, show } from '@/routes/studies';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { ModalLink } from '@inertiaui/modal-react';
-import { Calendar, Eye, FileText, Glasses, User } from 'lucide-react';
+import { Calendar, Eye, FileText, Glasses, User, X } from 'lucide-react';
 
 interface Patient {
     id: number;
@@ -76,6 +76,27 @@ export default function StudiesIndex({ studies, stats }: Props) {
             month: 'short',
             day: 'numeric',
         });
+    };
+
+    const handleStopVR = (study: Study) => {
+        if (
+            confirm(
+                `Are you sure you want to stop VR access for study ${study.code}?`,
+            )
+        ) {
+            router.post(
+                `/studies/${study.id}/disable-vr`,
+                {},
+                {
+                    onSuccess: () => {
+                        router.reload({ only: ['studies'] });
+                    },
+                    onError: (errors) => {
+                        console.error('Error disabling VR:', errors);
+                    },
+                },
+            );
+        }
     };
 
     return (
@@ -183,12 +204,27 @@ export default function StudiesIndex({ studies, stats }: Props) {
                                                         {study.code}
                                                     </div>
                                                     {study.is_vr && (
-                                                        <Badge
-                                                            className="mt-1 bg-purple-100 text-purple-700 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300"
-                                                            variant="secondary"
-                                                        >
-                                                            🥽 VR Ready
-                                                        </Badge>
+                                                        <div className="mt-1 flex items-center gap-1">
+                                                            <Badge
+                                                                className="bg-purple-100 text-purple-700 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300"
+                                                                variant="secondary"
+                                                            >
+                                                                🥽 VR Active
+                                                            </Badge>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-5 w-5 p-0 text-purple-600 hover:bg-purple-100 hover:text-purple-700 dark:text-purple-400 dark:hover:bg-purple-900/20"
+                                                                onClick={() =>
+                                                                    handleStopVR(
+                                                                        study,
+                                                                    )
+                                                                }
+                                                                title="Stop VR sharing"
+                                                            >
+                                                                <X className="h-3 w-3" />
+                                                            </Button>
+                                                        </div>
                                                     )}
                                                 </div>
                                             </div>
@@ -262,19 +298,33 @@ export default function StudiesIndex({ studies, stats }: Props) {
                                                     </Link>
                                                 </Button>
 
-                                                <Button
-                                                    asChild
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="border-purple-200 text-purple-600 hover:bg-purple-50 hover:text-purple-700"
-                                                >
-                                                    <ModalLink
-                                                        href={`#send-to-vr-${study.id}`}
+                                                {study.is_vr ? (
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="border-purple-200 text-purple-600 hover:bg-purple-50 hover:text-purple-700"
+                                                        onClick={() =>
+                                                            handleStopVR(study)
+                                                        }
                                                     >
-                                                        <Glasses className="h-4 w-4" />
-                                                        Send to VR
-                                                    </ModalLink>
-                                                </Button>
+                                                        <X className="h-4 w-4" />
+                                                        Stop VR
+                                                    </Button>
+                                                ) : (
+                                                    <Button
+                                                        asChild
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="border-purple-200 text-purple-600 hover:bg-purple-50 hover:text-purple-700"
+                                                    >
+                                                        <ModalLink
+                                                            href={`#send-to-vr-${study.id}`}
+                                                        >
+                                                            <Glasses className="h-4 w-4" />
+                                                            Send to VR
+                                                        </ModalLink>
+                                                    </Button>
+                                                )}
                                             </div>
                                         </TableCell>
                                     </TableRow>

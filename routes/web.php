@@ -22,6 +22,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('studies/{study}', [StudyController::class, 'show'])->name('studies.show');
     Route::post('studies/{study}/cancel', [StudyController::class, 'cancel'])->name('studies.cancel');
     Route::post('studies/{study}/send-to-vr', [StudyController::class, 'sendToVR'])->name('studies.send-to-vr');
+    Route::post('studies/{study}/disable-vr', [StudyController::class, 'disableVR'])->name('studies.disable-vr');
     Route::get('studies/{study}/assets/{asset}/download', [StudyController::class, 'downloadAsset'])->name('studies.assets.download');
 
     // API routes for modal components

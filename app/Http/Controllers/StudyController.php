@@ -160,7 +160,7 @@ class StudyController extends Controller
     }
 
     /**
-     * Send study to VR platform
+     * Send study to VR platform (exclusive - only one study can be VR-active at a time)
      */
     public function sendToVR(Study $study)
     {
@@ -171,7 +171,10 @@ class StudyController extends Controller
         }
 
         try {
-            // Simply update study to mark it as VR-enabled
+            // Auto-disable any currently active VR study (exclusive VR)
+            Study::where('is_vr', true)->update(['is_vr' => false]);
+
+            // Update study to mark it as VR-enabled
             $study->update([
                 'is_vr' => true
             ]);
@@ -192,6 +195,35 @@ class StudyController extends Controller
 
             return redirect()->back()
                 ->with('error', 'Failed to enable study for VR platform. Please try again.');
+        }
+    }
+
+    /**
+     * Disable VR for a study
+     */
+    public function disableVR(Study $study)
+    {
+        try {
+            $study->update([
+                'is_vr' => false
+            ]);
+            
+            Log::info("VR disabled for study {$study->code}", [
+                'study_id' => $study->id,
+                'patient' => $study->patient->name
+            ]);
+
+            return redirect()->back()
+                ->with('success', 'VR access disabled for this study.');
+
+        } catch (\Exception $e) {
+            Log::error("Failed to disable VR for study {$study->code}", [
+                'study_id' => $study->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'Failed to disable VR access. Please try again.');
         }
     }
 
