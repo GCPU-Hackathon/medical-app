@@ -7,6 +7,7 @@ use App\Models\Study;
 use Inertia\Response;
 use Illuminate\Http\Request;
 use App\Jobs\ProcessStudyPipeline;
+use App\Events\VRStatusChanged;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
@@ -171,17 +172,29 @@ class StudyController extends Controller
         }
 
         try {
+            // Get currently active VR studies to broadcast disable events
+            $previouslyActiveStudies = Study::where('is_vr', true)->get();
+            
             // Auto-disable any currently active VR study (exclusive VR)
             Study::where('is_vr', true)->update(['is_vr' => false]);
+            
+            // Broadcast disable events for previously active studies
+            foreach ($previouslyActiveStudies as $previousStudy) {
+                $previousStudy->is_vr = false; // Update the model state
+                VRStatusChanged::dispatch($previousStudy, 'disabled');
+            }
 
             // Update study to mark it as VR-enabled
             $study->update([
                 'is_vr' => true
             ]);
             
+            // Broadcast enable event for the new VR study
+            VRStatusChanged::dispatch($study, 'enabled');
+            
             Log::info("Study {$study->code} marked as VR-enabled", [
                 'study_id' => $study->id,
-                'patient' => $study->patient->name
+                'patient' => $study->patient->first_name . ' ' . $study->patient->last_name
             ]);
 
             return redirect()->back()
@@ -208,9 +221,12 @@ class StudyController extends Controller
                 'is_vr' => false
             ]);
             
+            // Broadcast disable event
+            VRStatusChanged::dispatch($study, 'disabled');
+            
             Log::info("VR disabled for study {$study->code}", [
                 'study_id' => $study->id,
-                'patient' => $study->patient->name
+                'patient' => $study->patient->first_name . ' ' . $study->patient->last_name
             ]);
 
             return redirect()->back()
