@@ -266,7 +266,7 @@ class StudyController extends Controller
     public function active()
     {
         try {
-            $studies = Study::with(['patient', 'assets', 'conversation'])
+            $studies = Study::with(['patient', 'assets'])
                 ->where('is_vr', true)
                 ->get()
                 ->map(function ($study) {
@@ -276,9 +276,12 @@ class StudyController extends Controller
                         return $asset;
                     });
                     
+                    // Load conversation manually with string casting
+                    $conversation = \App\Models\Conversation::where('study_id', (string)$study->id)->first();
+                    
                     // Add conversation URL if conversation exists
-                    if ($study->conversation) {
-                        $study->conversation_url = "https://holonauts.fr:1111/conversation/{$study->conversation->id}/continue";
+                    if ($conversation) {
+                        $study->conversation_url = "https://holonauts.fr:1111/conversation/{$conversation->id}/continue";
                     } else {
                         $study->conversation_url = null;
                     }
