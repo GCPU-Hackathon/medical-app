@@ -29,7 +29,12 @@ export default defineConfig({
     server: {
         host: '0.0.0.0',
         port: 5173,
-        allowedHosts: ['*'],
+        allowedHosts: [
+            'holonauts.fr',
+            'www.holonauts.fr',
+            'localhost',
+            '127.0.0.1',
+        ],
         cors: {
             origin: [
                 'http://localhost:8085',
