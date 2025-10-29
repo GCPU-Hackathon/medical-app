@@ -4,7 +4,7 @@ import { router } from '@inertiajs/react';
 import { Modal } from '@inertiaui/modal-react';
 import { Controls, Player } from '@lottiefiles/react-lottie-player';
 import { AlertTriangle, CheckCircle, Clock, Send, X } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 interface Patient {
     id: number;
