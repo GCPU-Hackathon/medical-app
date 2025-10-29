@@ -173,8 +173,7 @@ class StudyController extends Controller
         try {
             // Simply update study to mark it as VR-enabled
             $study->update([
-                'is_vr' => true,
-                'vr_sent_at' => now()
+                'is_vr' => true
             ]);
             
             Log::info("Study {$study->code} marked as VR-enabled", [
