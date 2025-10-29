@@ -51,8 +51,20 @@ fi
 # Create storage link if it doesn't exist
 php artisan storage:link || echo "Storage link already exists or failed"
 
+# Load environment variables from .env file
+if [ -f ".env" ]; then
+    export $(grep -v '^#' .env | xargs)
+fi
+
+# Debug environment variables
+echo "Current APP_ENV value: '${APP_ENV}'"
+echo "Checking Laravel environment..."
+LARAVEL_ENV=$(php artisan env | grep "Current environment" | cut -d' ' -f3 2>/dev/null || echo "unknown")
+echo "Laravel environment: ${LARAVEL_ENV}"
+
 # Start Vite dev server in background for local development
-if [ "${APP_ENV}" != "production" ]; then
+# Use Laravel's environment detection
+if [ "${LARAVEL_ENV}" != "production" ]; then
     echo "Development environment detected - starting Vite dev server..."
     cd /var/www && npm run dev &
     echo "Vite dev server started in background"
@@ -67,8 +79,8 @@ php artisan route:clear || echo "Route cache clear failed"
 php artisan view:clear || echo "View cache clear failed"
 php artisan cache:clear || echo "Application cache clear failed"
 
-# Optimize for production if APP_ENV is production
-if [ "${APP_ENV}" = "production" ]; then
+# Optimize for production if environment is production
+if [ "${APP_ENV}" = "production" ] || [ "${LARAVEL_ENV}" = "production" ]; then
     echo "Production environment detected - optimizing..."
     php artisan config:cache
     php artisan route:cache
