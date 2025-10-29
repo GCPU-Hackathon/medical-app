@@ -11,14 +11,14 @@ echo "Waiting for dependencies..."
 sleep 2
 
 # Create storage directories if they don't exist
-mkdir -p storage/logs storage/framework/{cache,sessions,views} bootstrap/cache storage/app/public
+mkdir -p storage/logs storage/framework/{cache,sessions,views} bootstrap/cache
 
-# Set permissions ONLY for directories we own (exclude mounted volumes)
-# Use || true to continue even if some operations fail
-chmod -R 775 storage/logs storage/framework bootstrap/cache storage/app/public 2>/dev/null || true
+# Set proper permissions for Laravel directories
+chmod -R 775 storage bootstrap/cache
+chown -R core:core storage bootstrap/cache
 
 # Only run initial setup if vendor directory doesn't exist
-if [ ! -d "vendor" ] || [ ! -f "vendor/autoload.php" ]; then
+if [ ! -d "vendor" ]; then
     echo "First time setup - installing dependencies..."
     
     # Install Composer dependencies
@@ -51,27 +51,30 @@ fi
 # Create storage link if it doesn't exist
 php artisan storage:link || echo "Storage link already exists or failed"
 
-# Load environment variables from .env file
-if [ -f ".env" ]; then
-    export $(grep -v '^#' .env | xargs)
-fi
+# Check environment for Vite server decision
+# Safely get APP_ENV from Laravel without modifying shell environment
+LARAVEL_APP_ENV=$(php -r "
+    if (file_exists('.env')) {
+        \$lines = file('.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach (\$lines as \$line) {
+            if (strpos(\$line, 'APP_ENV=') === 0 && strpos(\$line, '#') !== 0) {
+                echo trim(substr(\$line, 8));
+                break;
+            }
+        }
+    }
+")
 
-# Debug environment variables
-echo "Current APP_ENV value: '${APP_ENV}'"
-echo "Checking Laravel environment..."
-LARAVEL_ENV=$(php artisan env | grep "Current environment" | cut -d' ' -f3 2>/dev/null || echo "unknown")
-echo "Laravel environment: ${LARAVEL_ENV}"
+echo "Detected APP_ENV: '${LARAVEL_APP_ENV}'"
 
-# Start Vite dev server in background for local development
-# Use Laravel's environment detection
-if [ "${LARAVEL_ENV}" != "production" ]; then
+# Start Vite dev server in background for local development only
+if [ "${LARAVEL_APP_ENV}" != "production" ]; then
     echo "Development environment detected - starting Vite dev server..."
     cd /var/www && npm run dev &
     echo "Vite dev server started in background"
 else
     echo "Production environment - Vite dev server not started"
 fi
-
 # Clear Laravel caches (always run this)
 echo "Clearing Laravel caches..."
 php artisan config:clear || echo "Config cache clear failed"
@@ -79,8 +82,8 @@ php artisan route:clear || echo "Route cache clear failed"
 php artisan view:clear || echo "View cache clear failed"
 php artisan cache:clear || echo "Application cache clear failed"
 
-# Optimize for production if environment is production
-if [ "${APP_ENV}" = "production" ] || [ "${LARAVEL_ENV}" = "production" ]; then
+# Optimize for production if APP_ENV is production
+if [ "${LARAVEL_APP_ENV}" = "production" ]; then
     echo "Production environment detected - optimizing..."
     php artisan config:cache
     php artisan route:cache
