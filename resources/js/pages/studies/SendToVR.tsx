@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { router } from '@inertiajs/react';
 import { Modal } from '@inertiaui/modal-react';
 import { Controls, Player } from '@lottiefiles/react-lottie-player';
-import { AlertTriangle, Send, X } from 'lucide-react';
-import { useRef } from 'react';
+import { AlertTriangle, CheckCircle, Clock, Send, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 interface Patient {
     id: number;
@@ -27,22 +27,58 @@ interface SendToVRProps {
 }
 
 export const SendToVR = ({ study }: SendToVRProps) => {
-    const modalRef = useRef<{ close: () => void }>(null);
+    const [isSending, setIsSending] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
+
+    // Reset state when modal is opened
+    useEffect(() => {
+        const handleHashChange = () => {
+            if (window.location.hash === `#send-to-vr-${study.id}`) {
+                setIsSuccess(false);
+                setIsSending(false);
+            }
+        };
+
+        // Reset state immediately if modal is already open
+        if (window.location.hash === `#send-to-vr-${study.id}`) {
+            setIsSuccess(false);
+            setIsSending(false);
+        }
+
+        // Listen for hash changes
+        window.addEventListener('hashchange', handleHashChange);
+
+        return () => {
+            window.removeEventListener('hashchange', handleHashChange);
+        };
+    }, [study.id]);
+
+    const handleCancel = () => {
+        setIsSuccess(false);
+        setIsSending(false);
+        // Close the modal by removing the hash
+        window.location.hash = '';
+    };
 
     const handleSendToVR = () => {
+        setIsSending(true);
+
         router.post(
             `/studies/${study.id}/send-to-vr`,
             {},
             {
                 onSuccess: () => {
-                    modalRef.current?.close();
+                    setIsSuccess(true);
+                    setTimeout(() => {
+                        router.reload();
+                    }, 1500);
+                },
+                onError: (errors) => {
+                    console.error('Error enabling VR:', errors);
+                    setIsSending(false);
                 },
             },
         );
-    };
-
-    const handleCancel = () => {
-        modalRef.current?.close();
     };
 
     return (

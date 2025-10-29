@@ -266,7 +266,7 @@ class StudyController extends Controller
     public function active()
     {
         try {
-            $studies = Study::with(['patient', 'assets'])
+            $studies = Study::with(['patient', 'assets', 'conversation'])
                 ->where('is_vr', true)
                 ->get()
                 ->map(function ($study) {
@@ -275,6 +275,13 @@ class StudyController extends Controller
                         $asset->download_url = url("/private-storage/{$cleanPath}");
                         return $asset;
                     });
+                    
+                    // Add conversation URL if conversation exists
+                    if ($study->conversation) {
+                        $study->conversation_url = "https://holonauts.fr:1111/conversation/{$study->conversation->id}/continue";
+                    } else {
+                        $study->conversation_url = null;
+                    }
                     
                     return $study;
                 });
