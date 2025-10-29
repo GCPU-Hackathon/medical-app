@@ -51,6 +51,15 @@ fi
 # Create storage link if it doesn't exist
 php artisan storage:link || echo "Storage link already exists or failed"
 
+# Start Vite dev server in background for local development
+if [ "${APP_ENV}" != "production" ]; then
+    echo "Development environment detected - starting Vite dev server..."
+    cd /var/www && npm run dev &
+    echo "Vite dev server started in background"
+else
+    echo "Production environment - Vite dev server not started"
+fi
+
 # Clear Laravel caches (always run this)
 echo "Clearing Laravel caches..."
 php artisan config:clear || echo "Config cache clear failed"
