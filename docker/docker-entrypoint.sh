@@ -91,10 +91,7 @@ if [ "${LARAVEL_APP_ENV}" = "production" ]; then
 fi
 
 echo "Laravel setup completed successfully!"
-echo "Starting supervisord..."
-
-# echo "Starting websocket..."
-# php artisan reverb:start --host=0.0.0.0 --port=2025 --debug
+echo "Starting supervisord (includes Apache, PHP-FPM, Queue Worker, and Reverb WebSocket)..."
 
 # Execute the main command (supervisord)
 exec "$@"
