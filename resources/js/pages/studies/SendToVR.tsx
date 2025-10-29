@@ -3,8 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { router } from '@inertiajs/react';
 import { Modal } from '@inertiaui/modal-react';
 import { Controls, Player } from '@lottiefiles/react-lottie-player';
-import { AlertTriangle, CheckCircle, Clock, Send, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { AlertTriangle, Send, X } from 'lucide-react';
 
 interface Patient {
     id: number;
@@ -27,88 +26,12 @@ interface SendToVRProps {
 }
 
 export const SendToVR = ({ study }: SendToVRProps) => {
-    const [isSending, setIsSending] = useState(false);
-    const [isSuccess, setIsSuccess] = useState(false);
-
-    // Reset state when modal is opened
-    useEffect(() => {
-        const handleHashChange = () => {
-            if (window.location.hash === `#send-to-vr-${study.id}`) {
-                setIsSuccess(false);
-                setIsSending(false);
-            }
-        };
-
-        // Reset state immediately if modal is already open
-        if (window.location.hash === `#send-to-vr-${study.id}`) {
-            setIsSuccess(false);
-            setIsSending(false);
-        }
-
-        // Listen for hash changes
-        window.addEventListener('hashchange', handleHashChange);
-
-        return () => {
-            window.removeEventListener('hashchange', handleHashChange);
-        };
-    }, [study.id]);
+    const handleSendToVR = () => {
+        router.post(`/studies/${study.id}/send-to-vr`);
+    };
 
     const handleCancel = () => {
-        setIsSuccess(false);
-        setIsSending(false);
-        // Close the modal by removing the hash
         window.location.hash = '';
-    };
-
-    const handleSendToVR = () => {
-        setIsSending(true);
-
-        router.post(
-            `/studies/${study.id}/send-to-vr`,
-            {},
-            {
-                onSuccess: () => {
-                    setIsSuccess(true);
-                    setTimeout(() => {
-                        router.reload();
-                    }, 1500);
-                },
-                onError: (errors) => {
-                    console.error('Error enabling VR:', errors);
-                    setIsSending(false);
-                },
-            },
-        );
-    };
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'completed':
-                return 'bg-green-500';
-            case 'in_progress':
-                return 'bg-blue-500';
-            case 'pending':
-                return 'bg-yellow-500';
-            case 'cancelled':
-                return 'bg-red-500';
-            default:
-                return 'bg-gray-500';
-        }
-    };
-
-    const getStatusIcon = (status: string) => {
-        switch (status) {
-            case 'completed':
-                return <CheckCircle className="h-4 w-4" />;
-            case 'in_progress':
-                return <Clock className="h-4 w-4 animate-spin" />;
-            case 'pending':
-                return <Clock className="h-4 w-4" />;
-            case 'cancelled':
-                return <AlertTriangle className="h-4 w-4" />;
-            default:
-                return <Clock className="h-4 w-4" />;
-        }
     };
 
     return (
@@ -132,71 +55,38 @@ export const SendToVR = ({ study }: SendToVRProps) => {
                         </div>
                     )}
 
-                    {isSuccess ? (
-                        <div className="flex flex-col items-center justify-center py-8 text-center">
-                            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
-                                <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
-                            </div>
-                            <h3 className="mb-2 text-lg font-semibold text-green-900 dark:text-green-100">
-                                Successfully Enabled for VR!
-                            </h3>
-                            <p className="text-sm text-green-700 dark:text-green-300">
-                                Study {study.code} has been enabled for VR
-                                access. You can now access it through the VR
-                                platform API.
-                            </p>
-                        </div>
-                    ) : (
-                        <>
-                            {/* Study Information */}
-                            <div className="rounded-lg border bg-gray-50 p-4 dark:bg-gray-900/50">
-                                <Player
-                                    autoplay
-                                    loop
-                                    src="./lottiefiles/VR Learning.json"
-                                    style={{ height: '300px', width: '300px' }}
-                                >
-                                    <Controls visible={false} />
-                                </Player>
-                            </div>
+                    {/* Study Information */}
+                    <div className="rounded-lg border bg-gray-50 p-4 dark:bg-gray-900/50">
+                        <Player
+                            autoplay
+                            loop
+                            src="./lottiefiles/VR Learning.json"
+                            style={{ height: '300px', width: '300px' }}
+                        >
+                            <Controls visible={false} />
+                        </Player>
+                    </div>
 
-                            {/* Action Buttons */}
-                            <div className="flex items-center justify-between border-t pt-6">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    disabled={isSending}
-                                    onClick={handleCancel}
-                                >
-                                    <X className="mr-2 h-4 w-4" />
-                                    Cancel
-                                </Button>
+                    {/* Action Buttons */}
+                    <div className="flex items-center justify-between border-t pt-6">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={handleCancel}
+                        >
+                            <X className="mr-2 h-4 w-4" />
+                            Cancel
+                        </Button>
 
-                                <Button
-                                    onClick={handleSendToVR}
-                                    disabled={
-                                        isSending ||
-                                        study.status !== 'completed'
-                                    }
-                                    className="min-w-[140px] bg-purple-600 hover:bg-purple-700"
-                                >
-                                    {isSending ? (
-                                        <>
-                                            <span className="mr-2 animate-spin">
-                                                ⏳
-                                            </span>
-                                            Enabling VR...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Send className="mr-2 h-4 w-4" />
-                                            Enable VR Access
-                                        </>
-                                    )}
-                                </Button>
-                            </div>
-                        </>
-                    )}
+                        <Button
+                            onClick={handleSendToVR}
+                            disabled={study.status !== 'completed'}
+                            className="min-w-[140px] bg-purple-600 hover:bg-purple-700"
+                        >
+                            <Send className="mr-2 h-4 w-4" />
+                            Enable VR Access
+                        </Button>
+                    </div>
                 </CardContent>
             </Card>
         </Modal>
