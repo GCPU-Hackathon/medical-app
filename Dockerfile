@@ -74,7 +74,7 @@ USER core
 RUN composer install --no-interaction --prefer-dist || true
 RUN npm install || true
 
-EXPOSE 8080 5173
+EXPOSE 80 443 5173
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 
