@@ -4,6 +4,7 @@ import { router } from '@inertiajs/react';
 import { Modal } from '@inertiaui/modal-react';
 import { Controls, Player } from '@lottiefiles/react-lottie-player';
 import { AlertTriangle, Send, X } from 'lucide-react';
+import { useRef } from 'react';
 
 interface Patient {
     id: number;
@@ -26,16 +27,26 @@ interface SendToVRProps {
 }
 
 export const SendToVR = ({ study }: SendToVRProps) => {
+    const modalRef = useRef<{ close: () => void }>(null);
+
     const handleSendToVR = () => {
-        router.post(`/studies/${study.id}/send-to-vr`);
+        router.post(
+            `/studies/${study.id}/send-to-vr`,
+            {},
+            {
+                onSuccess: () => {
+                    modalRef.current?.close();
+                },
+            },
+        );
     };
 
     const handleCancel = () => {
-        window.location.hash = '';
+        modalRef.current?.close();
     };
 
     return (
-        <Modal name={`send-to-vr-${study.id}`} maxWidth="2xl">
+        <Modal ref={modalRef} name={`send-to-vr-${study.id}`} maxWidth="2xl">
             <Card className="border-0 shadow-none">
                 <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
