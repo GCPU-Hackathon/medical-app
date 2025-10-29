@@ -93,8 +93,8 @@ fi
 echo "Laravel setup completed successfully!"
 echo "Starting supervisord..."
 
-echo "Starting websocket..."
-php artisan reverb:start --host=0.0.0.0 --port=2025 --debug
+# echo "Starting websocket..."
+# php artisan reverb:start --host=0.0.0.0 --port=2025 --debug
 
 # Execute the main command (supervisord)
 exec "$@"
