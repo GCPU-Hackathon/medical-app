@@ -51,9 +51,6 @@ fi
 # Create storage link if it doesn't exist
 php artisan storage:link || echo "Storage link already exists or failed"
 
-echo "Starting websocket..."
-php artisan reverb:start --host=0.0.0.0 --port=2025 --debug
-
 # Check environment for Vite server decision
 # Safely get APP_ENV from Laravel without modifying shell environment
 LARAVEL_APP_ENV=$(php -r "
@@ -96,6 +93,8 @@ fi
 echo "Laravel setup completed successfully!"
 echo "Starting supervisord..."
 
+echo "Starting websocket..."
+php artisan reverb:start --host=0.0.0.0 --port=2025 --debug
 
 # Execute the main command (supervisord)
 exec "$@"
