@@ -35,17 +35,7 @@ export default defineConfig({
             'localhost',
             '127.0.0.1',
         ],
-        cors: {
-            origin: [
-                'http://localhost:8085',
-                'http://localhost:5173',
-                'http://127.0.0.1:8085',
-                'http://127.0.0.1:5173',
-                // 'http://136.115.172.51:8085',
-                // 'http://136.115.172.51:5173',
-            ],
-            credentials: true,
-        },
+        cors: true,
         hmr: {
             host: 'localhost',
             port: 5173,
