@@ -4,7 +4,7 @@ import { router } from '@inertiajs/react';
 import { Modal } from '@inertiaui/modal-react';
 import { Controls, Player } from '@lottiefiles/react-lottie-player';
 import { AlertTriangle, CheckCircle, Clock, Send, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface Patient {
     id: number;
@@ -29,6 +29,36 @@ interface SendToVRProps {
 export const SendToVR = ({ study }: SendToVRProps) => {
     const [isSending, setIsSending] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+
+    // Reset state when modal is opened
+    useEffect(() => {
+        const handleHashChange = () => {
+            if (window.location.hash === `#send-to-vr-${study.id}`) {
+                setIsSuccess(false);
+                setIsSending(false);
+            }
+        };
+
+        // Reset state immediately if modal is already open
+        if (window.location.hash === `#send-to-vr-${study.id}`) {
+            setIsSuccess(false);
+            setIsSending(false);
+        }
+
+        // Listen for hash changes
+        window.addEventListener('hashchange', handleHashChange);
+
+        return () => {
+            window.removeEventListener('hashchange', handleHashChange);
+        };
+    }, [study.id]);
+
+    const handleCancel = () => {
+        setIsSuccess(false);
+        setIsSending(false);
+        // Close the modal by removing the hash
+        window.location.hash = '';
+    };
 
     const handleSendToVR = () => {
         setIsSending(true);
@@ -136,6 +166,7 @@ export const SendToVR = ({ study }: SendToVRProps) => {
                                     type="button"
                                     variant="outline"
                                     disabled={isSending}
+                                    onClick={handleCancel}
                                 >
                                     <X className="mr-2 h-4 w-4" />
                                     Cancel
