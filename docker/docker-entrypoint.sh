@@ -69,5 +69,7 @@ fi
 echo "Laravel setup completed successfully!"
 echo "Starting supervisord..."
 
+npm run dev
+
 # Execute the main command (supervisord)
 exec "$@"
