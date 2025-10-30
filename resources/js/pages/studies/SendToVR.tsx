@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { router } from '@inertiajs/react';
 import { Modal } from '@inertiaui/modal-react';
 import { Controls, Player } from '@lottiefiles/react-lottie-player';
-import { AlertTriangle, CheckCircle, Clock, Send, X } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { AlertTriangle, Send, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 interface Patient {
     id: number;
@@ -29,6 +29,7 @@ interface SendToVRProps {
 export const SendToVR = ({ study }: SendToVRProps) => {
     const [isSending, setIsSending] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const modalRef = useRef();
 
     // Reset state when modal is opened
     useEffect(() => {
