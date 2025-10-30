@@ -4,6 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { router } from '@inertiajs/react';
 import { Modal } from '@inertiaui/modal-react';
@@ -29,6 +36,7 @@ export const Create = () => {
     );
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
+    const [organType, setOrganType] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -69,6 +77,7 @@ export const Create = () => {
                         setSelectedDirectory(null);
                         setTitle('');
                         setDescription('');
+                        setOrganType('');
                     },
                     onFinish: () => {
                         setIsSubmitting(false);
@@ -86,6 +95,7 @@ export const Create = () => {
         setSelectedDirectory(null);
         setTitle('');
         setDescription('');
+        setOrganType('');
     };
 
     return (
@@ -129,6 +139,25 @@ export const Create = () => {
                                         placeholder="Enter study title..."
                                         required
                                     />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="organ-type">
+                                        Organ Type *
+                                    </Label>
+                                    <Select
+                                        value={organType}
+                                        onValueChange={setOrganType}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select organ type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="brain">
+                                                Brain
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
 
                                 {/* Description */}
