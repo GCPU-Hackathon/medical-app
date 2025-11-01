@@ -54,7 +54,7 @@ class ProcessLLMAnalysis implements ShouldQueue
             $response = Http::
                 withoutVerifying()
                 ->timeout(80)
-                ->post('http://medchatbot:8000/conversation/start', [
+                ->post('https://medchatbot:8000/conversation/start', [
                     'study_id' => $this->study->id,
                     'study_code' => $this->study->code
                 ]);
