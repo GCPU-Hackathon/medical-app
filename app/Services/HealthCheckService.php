@@ -14,7 +14,8 @@ class HealthCheckService
     public static function checkServiceHealth(string $url, int $timeout = 5): array
     {
         try {
-            $response = Http::timeout($timeout)->get($url);
+            $response = Http::withoutVerifying()
+                ->timeout($timeout)->get($url);
             
             if ($response->successful()) {
                 $data = $response->json();
