@@ -41,9 +41,7 @@ class ProcessQualityCheck implements ShouldQueue
         ]);
 
         try {
-            
-            sleep(3);
-            
+                        
             // Step 1: Download all gz files from GCS directory
             $gzFiles = $this->downloadGzFilesFromGCS();
             // Step 2: Check if files are in correct format (*-t2w.nii.gz, *-t1c.nii.gz, *-t1n.nii.gz, *-t2f.nii.gz)

@@ -77,8 +77,6 @@ class ProcessVolumetry implements ShouldQueue
                 );
             }
 
-            sleep(5);
-
             // Look for and store the metrics file
             $this->storeMetricsFile();
 
