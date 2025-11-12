@@ -292,7 +292,8 @@ class StudyController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $studies,
-                'count' => $studies->count()
+                'count' => $studies->count(),
+                'picovoice_key' => env('PICOVOICE_KEY')
             ]);
 
         } catch (\Exception $e) {
