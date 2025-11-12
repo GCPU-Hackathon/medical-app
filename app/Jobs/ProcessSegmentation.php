@@ -133,6 +133,7 @@ class ProcessSegmentation implements ShouldQueue
         Log::info("Starting to poll segmentation status", ['task_id' => $taskId]);
         
         while ($attempt < $maxAttempts) {
+            sleep(5);
             
             try {
                 $response = Http::timeout(10)
