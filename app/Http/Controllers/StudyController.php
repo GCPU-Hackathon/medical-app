@@ -293,7 +293,9 @@ class StudyController extends Controller
                 'success' => true,
                 'data' => $studies,
                 'count' => $studies->count(),
-                'picovoice_key' => env('PICOVOICE_KEY')
+                'picovoice_key' => env('PICOVOICE_KEY'),
+                'stt_key' => env('STT_KEY'),
+                'tts_key' => env('TTS_KEY')
             ]);
 
         } catch (\Exception $e) {
